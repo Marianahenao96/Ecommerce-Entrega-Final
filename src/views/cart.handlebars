@@ -1,0 +1,28 @@
+<h2 class="mb-4">Mi Carrito</h2>
+
+<table class="table table-striped table-hover">
+  <thead class="table-dark">
+    <tr>
+      <th>Producto</th>
+      <th>Precio</th>
+      <th>Cantidad</th>
+      <th>Total</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each cart.products}}
+      <tr>
+        <td>{{this.product.title}}</td>
+        <td>${{this.product.price}}</td>
+        <td>{{this.quantity}}</td>
+        <td>${{multiply this.product.price this.quantity}}</td>
+        <td>
+          <form action="/api/carts/{{../cart._id}}/products/{{this.product._id}}?_method=DELETE" method="post">
+            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>

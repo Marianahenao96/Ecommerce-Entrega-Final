@@ -1,0 +1,93 @@
+{
+  "info": {
+    "name": "Ecommerce Final",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET Products",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/api/products",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "products"
+          ]
+        }
+      }
+    },
+    {
+      "name": "POST Product",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": \"Ejemplo\", \"description\": \"desc\", \"code\": \"EX-001\", \"price\": 1000, \"stock\": 5, \"category\": \"test\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/products",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "products"
+          ]
+        }
+      }
+    },
+    {
+      "name": "POST Cart",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://localhost:8080/api/carts",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "carts"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Add product to cart",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://localhost:8080/api/carts/{{cartId}}/products/{{productId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "carts",
+            "{{cartId}}",
+            "products",
+            "{{productId}}"
+          ]
+        }
+      }
+    }
+  ]
+}
