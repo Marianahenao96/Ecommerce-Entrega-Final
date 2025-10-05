@@ -15,9 +15,11 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Activar paginación
 productSchema.plugin(mongoosePaginate);
 
-// ✅ Previene el error "Cannot overwrite model once compiled"
-const ProductModel = mongoose.models.Product || mongoose.model('Product', productSchema);
+// Evitar el error “Cannot overwrite model once compiled”
+const ProductModel =
+  mongoose.models.Product || mongoose.model('Product', productSchema);
 
 export default ProductModel;

@@ -2,7 +2,7 @@
   <h2 class="text-center mb-4">📦 Lista de Productos</h2>
 
   <div class="row">
-    {{#each products}}
+    {{#each payload}}
       <div class="col-md-4 mb-4">
         <div class="card h-100 shadow-sm">
           <img 
@@ -19,7 +19,7 @@
             <p><span class="badge bg-info">{{this.category}}</span></p>
 
             <div class="mt-auto d-flex justify-content-between">
-              <a href="/api/products/{{this._id}}" class="btn btn-sm btn-outline-primary">
+              <a href="/products/{{this._id}}" class="btn btn-sm btn-outline-primary">
                 Ver más
               </a>
               <form action="/api/carts/ID_DEL_CARRITO/products/{{this._id}}" method="post">
