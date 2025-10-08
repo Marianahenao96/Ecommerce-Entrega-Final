@@ -4,7 +4,7 @@ import CartModel from '../models/Cart.js';
 
 const router = Router();
 
-// Redirección principal
+// 🔹 Redirección principal
 router.get('/', (req, res) => res.redirect('/products'));
 
 // 📦 Listar productos (con paginación, filtros y orden)
@@ -12,36 +12,44 @@ router.get('/products', async (req, res) => {
   try {
     const { limit = 10, page = 1, sort, query } = req.query;
 
-    // Filtros dinámicos
+    // ✅ Buscar o crear un carrito (si no existe, se genera uno nuevo)
+    let cart = await CartModel.findOne();
+    if (!cart) {
+      cart = await CartModel.create({ products: [] });
+      console.log('🛒 Nuevo carrito creado con ID:', cart._id);
+    }
+
+    // 🔹 Filtros dinámicos
     const filter = query
       ? query === 'available'
         ? { stock: { $gt: 0 } }
         : { category: query }
       : {};
 
-    // Opciones de paginación
+    // 🔹 Opciones de paginación
     const options = {
       page: parseInt(page),
       limit: parseInt(limit),
       lean: true
     };
 
-    // Ordenamiento opcional
+    // 🔹 Ordenamiento opcional
     if (sort) options.sort = { price: sort === 'asc' ? 1 : -1 };
 
-    // Consulta con paginate
+    // 🔹 Consulta con paginate
     const result = await ProductModel.paginate(filter, options);
 
-    // Renderizar vista con productos
+    // 🔹 Renderizar vista con productos y pasar cartId
     res.render('products', {
       title: 'Productos',
-      payload: result.docs,          // 👈 Usamos "payload" para que coincida con tu .handlebars
+      payload: result.docs,
       page: result.page,
       totalPages: result.totalPages,
       hasPrevPage: result.hasPrevPage,
       hasNextPage: result.hasNextPage,
       prevLink: result.hasPrevPage ? `/products?page=${result.prevPage}` : null,
-      nextLink: result.hasNextPage ? `/products?page=${result.nextPage}` : null
+      nextLink: result.hasNextPage ? `/products?page=${result.nextPage}` : null,
+      cartId: cart._id.toString() // 👈 Se pasa el ID real del carrito
     });
 
   } catch (error) {

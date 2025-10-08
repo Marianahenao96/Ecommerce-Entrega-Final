@@ -1,93 +1,126 @@
 {
   "info": {
-    "name": "Ecommerce Final",
+    "name": "Ecommerce Final API",
+    "_postman_id": "ecommerce-final-collection",
+    "description": "Colección de pruebas para la API del proyecto Ecommerce Final. Incluye rutas de productos y carritos.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "GET Products",
+      "name": "🛍️ Obtener todos los productos",
       "request": {
         "method": "GET",
         "url": {
           "raw": "http://localhost:8080/api/products",
           "protocol": "http",
-          "host": [
-            "localhost"
-          ],
+          "host": ["localhost"],
           "port": "8080",
-          "path": [
-            "api",
-            "products"
-          ]
+          "path": ["api", "products"]
         }
-      }
+      },
+      "response": []
     },
     {
-      "name": "POST Product",
+      "name": "📦 Crear nuevo producto",
       "request": {
         "method": "POST",
         "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
+          { "key": "Content-Type", "value": "application/json" }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\"title\": \"Ejemplo\", \"description\": \"desc\", \"code\": \"EX-001\", \"price\": 1000, \"stock\": 5, \"category\": \"test\"}"
+          "raw": "{\n  \"title\": \"Producto de prueba\",\n  \"description\": \"Descripción de ejemplo\",\n  \"code\": \"PR-001\",\n  \"price\": 1200,\n  \"stock\": 10,\n  \"category\": \"Electrónica\",\n  \"thumbnails\": [\"https://via.placeholder.com/200\"]\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/products",
           "protocol": "http",
-          "host": [
-            "localhost"
-          ],
+          "host": ["localhost"],
           "port": "8080",
-          "path": [
-            "api",
-            "products"
-          ]
+          "path": ["api", "products"]
         }
-      }
+      },
+      "response": []
     },
     {
-      "name": "POST Cart",
+      "name": "🛒 Crear carrito vacío",
       "request": {
         "method": "POST",
         "url": {
           "raw": "http://localhost:8080/api/carts",
           "protocol": "http",
-          "host": [
-            "localhost"
-          ],
+          "host": ["localhost"],
           "port": "8080",
-          "path": [
-            "api",
-            "carts"
-          ]
+          "path": ["api", "carts"]
         }
-      }
+      },
+      "response": []
     },
     {
-      "name": "Add product to cart",
+      "name": "➕ Agregar producto al carrito",
       "request": {
         "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"quantity\": 2 }"
+        },
         "url": {
           "raw": "http://localhost:8080/api/carts/{{cartId}}/products/{{productId}}",
           "protocol": "http",
-          "host": [
-            "localhost"
-          ],
+          "host": ["localhost"],
           "port": "8080",
-          "path": [
-            "api",
-            "carts",
-            "{{cartId}}",
-            "products",
-            "{{productId}}"
-          ]
+          "path": ["api", "carts", "{{cartId}}", "products", "{{productId}}"]
         }
-      }
+      },
+      "response": []
+    },
+    {
+      "name": "🧾 Obtener carrito por ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/api/carts/{{cartId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "carts", "{{cartId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "🗑️ Eliminar producto del carrito",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://localhost:8080/api/carts/{{cartId}}/products/{{productId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "carts", "{{cartId}}", "products", "{{productId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "🚮 Vaciar carrito",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://localhost:8080/api/carts/{{cartId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "carts", "{{cartId}}"]
+        }
+      },
+      "response": []
     }
+  ],
+  "variable": [
+    { "key": "cartId", "value": "" },
+    { "key": "productId", "value": "" }
   ]
 }
