@@ -1,35 +1,423 @@
-<div class="container mt-5">
-  <div class="row">
-    <!-- Imagen del producto -->
-    <div class="col-md-6">
-      <img 
-        src="{{product.thumbnails.[0]}}" 
-        alt="{{product.title}}" 
-        class="img-fluid rounded shadow-sm"
-        onerror="this.src='/img/no-image.png'"
-      >
+<div class="container">
+  <div class="product-detail">
+    <!-- Navegación -->
+    <div class="breadcrumb">
+      <a href="/products">🏠 Productos</a>
+      <span>›</span>
+      <span>{{product.title}}</span>
     </div>
 
-    <!-- Información del producto -->
-    <div class="col-md-6">
-      <h2 class="mb-3">{{product.title}}</h2>
-      <p class="text-muted">{{product.description}}</p>
+    <div class="product-layout">
+      <!-- Imagen del producto -->
+      <div class="product-images">
+        {{#if product.thumbnails.[0]}}
+          <img 
+            src="{{product.thumbnails.[0]}}" 
+            alt="{{product.title}}" 
+            class="main-image"
+          >
+        {{else}}
+          <div class="no-image-large">
+            <span>📦</span>
+            <p>Sin imagen disponible</p>
+          </div>
+        {{/if}}
 
-      <h4 class="text-primary fw-bold mb-3">${{product.price}}</h4>
-      <p><strong>Stock:</strong> {{product.stock}}</p>
-      <p><strong>Categoría:</strong> <span class="badge bg-info">{{product.category}}</span></p>
-      <p><strong>Código:</strong> {{product.code}}</p>
-      <p><strong>Estado:</strong> {{#if product.status}}Disponible ✅{{else}}No disponible ❌{{/if}}</p>
+        <!-- Galería de miniaturas -->
+        {{#if product.thumbnails.length}}
+          <div class="thumbnail-gallery">
+            {{#each product.thumbnails}}
+              <img 
+                src="{{this}}" 
+                alt="{{../product.title}}" 
+                class="thumbnail"
+                onclick="changeMainImage('{{this}}')"
+              >
+            {{/each}}
+          </div>
+        {{/if}}
+      </div>
 
-      <!-- Botones -->
-      <div class="mt-4 d-flex gap-3">
-        <form action="/api/carts/ID_DEL_CARRITO/products/{{product._id}}" method="post">
-          <button type="submit" class="btn btn-success btn-lg">
-            🛒 Agregar al carrito
-          </button>
-        </form>
-        <a href="/api/products?page=1" class="btn btn-outline-secondary btn-lg">⬅️ Volver a productos</a>
+      <!-- Información del producto -->
+      <div class="product-info">
+        <h1 class="product-title">{{product.title}}</h1>
+        
+        <div class="product-price">
+          <span class="price">${{product.price}}</span>
+          {{#if product.stock}}
+            <span class="availability available">✅ Disponible</span>
+          {{else}}
+            <span class="availability unavailable">❌ Agotado</span>
+          {{/if}}
+        </div>
+
+        <div class="product-description">
+          <h3>Descripción</h3>
+          <p>{{product.description}}</p>
+        </div>
+
+        <div class="product-details">
+          <div class="detail-item">
+            <strong>Código:</strong>
+            <span>{{product.code}}</span>
+          </div>
+          <div class="detail-item">
+            <strong>Categoría:</strong>
+            <span class="category-tag">{{product.category}}</span>
+          </div>
+          <div class="detail-item">
+            <strong>Stock:</strong>
+            <span class="stock-amount">{{product.stock}} unidades</span>
+          </div>
+          <div class="detail-item">
+            <strong>Estado:</strong>
+            {{#if product.status}}
+              <span class="status active">Activo</span>
+            {{else}}
+              <span class="status inactive">Inactivo</span>
+            {{/if}}
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="product-actions">
+          {{#if product.stock}}
+            <form action="/api/carts/{{cartId}}/products/{{product._id}}" method="post" class="add-to-cart-form">
+              <div class="quantity-selector">
+                <label for="quantity">Cantidad:</label>
+                <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{product.stock}}">
+              </div>
+              <button type="submit" class="btn btn-primary btn-large">
+                🛒 Agregar al carrito
+              </button>
+            </form>
+          {{else}}
+            <button class="btn btn-secondary btn-large" disabled>
+              ❌ Producto agotado
+            </button>
+          {{/if}}
+          
+          <a href="/products" class="btn btn-outline btn-large">
+            ⬅️ Volver a productos
+          </a>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  function changeMainImage(src) {
+    document.querySelector('.main-image').src = src;
+  }
+</script>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .breadcrumb {
+    margin-bottom: 20px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .breadcrumb a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .breadcrumb span {
+    margin: 0 10px;
+    color: #666;
+  }
+
+  .product-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 20px;
+  }
+
+  .product-images {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .main-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .no-image-large {
+    width: 100%;
+    height: 400px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+  }
+
+  .no-image-large span {
+    font-size: 48px;
+    margin-bottom: 10px;
+  }
+
+  .thumbnail-gallery {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .thumbnail {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .thumbnail:hover {
+    border-color: #007bff;
+  }
+
+  .product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .product-title {
+    font-size: 28px;
+    color: #333;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .product-price {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
+  }
+
+  .price {
+    font-size: 32px;
+    font-weight: bold;
+    color: #28a745;
+  }
+
+  .availability {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .available {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .unavailable {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  .product-description {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  .product-description h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 18px;
+  }
+
+  .product-description p {
+    margin: 0;
+    line-height: 1.6;
+    color: #666;
+  }
+
+  .product-details {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f3f4;
+  }
+
+  .detail-item:last-child {
+    border-bottom: none;
+  }
+
+  .detail-item strong {
+    color: #333;
+  }
+
+  .category-tag {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .stock-amount {
+    color: #666;
+    font-weight: 500;
+  }
+
+  .status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .status.active {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .status.inactive {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  .product-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .add-to-cart-form {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .quantity-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .quantity-selector label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .quantity-selector input {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:disabled {
+    background: #adb5bd;
+    cursor: not-allowed;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: #007bff;
+    border: 2px solid #007bff;
+  }
+
+  .btn-outline:hover {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-large {
+    padding: 15px 30px;
+    font-size: 18px;
+  }
+
+  @media (max-width: 768px) {
+    .product-layout {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .product-price {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .add-to-cart-form {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .quantity-selector {
+      align-items: center;
+    }
+  }
+</style>

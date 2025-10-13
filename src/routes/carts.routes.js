@@ -1,35 +1,36 @@
+// src/routes/carts.routes.js
 import { Router } from 'express';
 import {
   createCart,
   getCart,
   addProductToCart,
   deleteProductFromCart,
-  updateCartProducts,
   updateProductQuantity,
+  updateCart,
   clearCart
 } from '../controllers/cartController.js';
 
 const router = Router();
 
-// Crear carrito
+// ✅ Crear carrito
 router.post('/', createCart);
 
-// Obtener carrito por ID
+// ✅ Obtener carrito (con populate)
 router.get('/:cid', getCart);
 
-// Agregar producto al carrito
+// ✅ Agregar producto al carrito
 router.post('/:cid/products/:pid', addProductToCart);
 
-// Eliminar producto específico
+// ✅ Eliminar producto específico del carrito
 router.delete('/:cid/products/:pid', deleteProductFromCart);
 
-// Reemplazar todos los productos del carrito
-router.put('/:cid', updateCartProducts);
-
-// Actualizar cantidad de un producto específico
+// ✅ Actualizar cantidad de un producto específico
 router.put('/:cid/products/:pid', updateProductQuantity);
 
-// Vaciar carrito
+// ✅ Actualizar todos los productos del carrito
+router.put('/:cid', updateCart);
+
+// ✅ Vaciar carrito (eliminar todos los productos)
 router.delete('/:cid', clearCart);
 
 export default router;

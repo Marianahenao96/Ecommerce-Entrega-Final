@@ -1,28 +1,446 @@
-<h2 class="mb-4">Mi Carrito</h2>
+<div class="container">
+  <div class="cart-header">
+    <h1>🛒 Mi Carrito</h1>
+    <div class="cart-actions">
+      <a href="/products" class="btn btn-outline">
+        ← Continuar comprando
+      </a>
+    </div>
+  </div>
 
-<table class="table table-striped table-hover">
-  <thead class="table-dark">
-    <tr>
-      <th>Producto</th>
-      <th>Precio</th>
-      <th>Cantidad</th>
-      <th>Total</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{#each cart.products}}
-      <tr>
-        <td>{{this.product.title}}</td>
-        <td>${{this.product.price}}</td>
-        <td>{{this.quantity}}</td>
-        <td>${{multiply this.product.price this.quantity}}</td>
-        <td>
-          <form action="/api/carts/{{../cart._id}}/products/{{this.product._id}}?_method=DELETE" method="post">
-            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-          </form>
-        </td>
-      </tr>
-    {{/each}}
-  </tbody>
-</table>
+  {{#if cart.products.length}}
+    <div class="cart-content">
+      <div class="cart-items">
+        {{#each cart.products}}
+          <div class="cart-item">
+            <div class="item-image">
+              {{#if this.product.thumbnails.[0]}}
+                <img src="{{this.product.thumbnails.[0]}}" alt="{{this.product.title}}">
+              {{else}}
+                <div class="no-image">📦</div>
+              {{/if}}
+            </div>
+
+            <div class="item-details">
+              <h3 class="item-title">{{this.product.title}}</h3>
+              <p class="item-description">{{this.product.description}}</p>
+              <div class="item-meta">
+                <span class="item-category">{{this.product.category}}</span>
+                <span class="item-code">Código: {{this.product.code}}</span>
+              </div>
+            </div>
+
+            <div class="item-quantity">
+              <label for="quantity-{{this.product._id}}">Cantidad:</label>
+              <form action="/api/carts/{{../cart._id}}/products/{{this.product._id}}" method="POST" class="quantity-form">
+                <input 
+                  type="number" 
+                  id="quantity-{{this.product._id}}"
+                  name="quantity" 
+                  value="{{this.quantity}}" 
+                  min="1" 
+                  max="{{this.product.stock}}"
+                  onchange="this.form.submit()"
+                >
+              </form>
+            </div>
+
+            <div class="item-price">
+              <span class="unit-price">${{this.product.price}}</span>
+              <span class="total-price">Total: ${{multiply this.quantity this.product.price}}</span>
+            </div>
+
+            <div class="item-actions">
+              <form action="/api/carts/{{../cart._id}}/products/{{this.product._id}}" method="POST" class="delete-form">
+                <input type="hidden" name="_method" value="DELETE">
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este producto del carrito?')">
+                  🗑️ Eliminar
+                </button>
+              </form>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+
+      <div class="cart-summary">
+        <div class="summary-card">
+          <h3>Resumen del pedido</h3>
+          
+          <div class="summary-details">
+            <div class="summary-item">
+              <span>Productos:</span>
+              <span>{{cart.products.length}}</span>
+            </div>
+            
+            <div class="summary-item">
+              <span>Subtotal:</span>
+              <span>${{cartSubtotal}}</span>
+            </div>
+            
+            <div class="summary-item total">
+              <span>Total:</span>
+              <span>${{cartTotal}}</span>
+            </div>
+          </div>
+
+          <div class="summary-actions">
+            <button class="btn btn-primary btn-large" onclick="alert('¡Función de checkout próximamente!')">
+              💳 Proceder al pago
+            </button>
+            
+            <form action="/api/carts/{{cart._id}}" method="POST" class="clear-cart-form">
+              <input type="hidden" name="_method" value="DELETE">
+              <button type="submit" class="btn btn-secondary" onclick="return confirm('¿Vaciar todo el carrito?')">
+                🧹 Vaciar carrito
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {{else}}
+    <div class="empty-cart">
+      <div class="empty-cart-content">
+        <div class="empty-cart-icon">🛒</div>
+        <h2>Tu carrito está vacío</h2>
+        <p>No tienes productos en tu carrito de compras.</p>
+        <a href="/products" class="btn btn-primary btn-large">
+          🛍️ Comenzar a comprar
+        </a>
+      </div>
+    </div>
+  {{/if}}
+</div>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  .cart-header h1 {
+    margin: 0;
+    color: #333;
+    font-size: 32px;
+  }
+
+  .cart-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+  }
+
+  .cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .cart-item {
+    display: grid;
+    grid-template-columns: 100px 1fr auto auto auto;
+    gap: 20px;
+    align-items: center;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s;
+  }
+
+  .cart-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .item-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .no-image {
+    width: 100%;
+    height: 100%;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #6c757d;
+  }
+
+  .item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .item-title {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+    line-height: 1.3;
+  }
+
+  .item-description {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .item-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+  }
+
+  .item-category {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .item-code {
+    color: #666;
+  }
+
+  .item-quantity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .item-quantity label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+  }
+
+  .quantity-form input {
+    width: 60px;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .item-price {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    text-align: center;
+  }
+
+  .unit-price {
+    font-size: 14px;
+    color: #666;
+  }
+
+  .total-price {
+    font-size: 16px;
+    font-weight: bold;
+    color: #28a745;
+  }
+
+  .item-actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .cart-summary {
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+  }
+
+  .summary-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 25px;
+  }
+
+  .summary-card h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 20px;
+  }
+
+  .summary-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 25px;
+  }
+
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+  }
+
+  .summary-item.total {
+    border-top: 2px solid #dee2e6;
+    padding-top: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .summary-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .empty-cart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+  }
+
+  .empty-cart-content {
+    text-align: center;
+    max-width: 400px;
+  }
+
+  .empty-cart-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+  }
+
+  .empty-cart-content h2 {
+    margin: 0 0 15px 0;
+    color: #333;
+  }
+
+  .empty-cart-content p {
+    margin: 0 0 25px 0;
+    color: #666;
+    line-height: 1.5;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #545b62;
+  }
+
+  .btn-danger {
+    background: #dc3545;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #c82333;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: #007bff;
+    border: 2px solid #007bff;
+  }
+
+  .btn-outline:hover {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  .btn-large {
+    padding: 15px 30px;
+    font-size: 18px;
+  }
+
+  .delete-form {
+    margin: 0;
+  }
+
+  .clear-cart-form {
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .cart-content {
+      grid-template-columns: 1fr;
+    }
+
+    .cart-item {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 15px;
+    }
+
+    .item-image {
+      justify-self: center;
+    }
+
+    .cart-header {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+    }
+
+    .cart-header h1 {
+      font-size: 24px;
+    }
+  }
+</style>

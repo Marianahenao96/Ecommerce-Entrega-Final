@@ -12,46 +12,64 @@ router.get('/products', async (req, res) => {
   try {
     const { limit = 10, page = 1, sort, query } = req.query;
 
-    // ✅ Buscar o crear un carrito (si no existe, se genera uno nuevo)
+    // ✅ Buscar o crear un carrito (si no existe)
     let cart = await CartModel.findOne();
     if (!cart) {
       cart = await CartModel.create({ products: [] });
       console.log('🛒 Nuevo carrito creado con ID:', cart._id);
     }
 
-    // 🔹 Filtros dinámicos
-    const filter = query
-      ? query === 'available'
-        ? { stock: { $gt: 0 } }
-        : { category: query }
-      : {};
+    // Construir filtros basados en query
+    let filter = {};
+    if (query) {
+      if (query === 'available') {
+        filter = { stock: { $gt: 0 }, status: true };
+      } else {
+        // Validar que la categoría sea válida
+        const validCategories = ['electronics', 'clothing', 'books', 'home', 'sports', 'beauty', 'toys', 'automotive', 'other'];
+        if (validCategories.includes(query)) {
+          filter = { category: query, status: true };
+        } else {
+          // Si la categoría no es válida, mostrar todos los productos activos
+          filter = { status: true };
+        }
+      }
+    } else {
+      // Por defecto, mostrar solo productos activos
+      filter = { status: true };
+    }
 
-    // 🔹 Opciones de paginación
     const options = {
       page: parseInt(page),
       limit: parseInt(limit),
-      lean: true
+      lean: true,
     };
 
-    // 🔹 Ordenamiento opcional
     if (sort) options.sort = { price: sort === 'asc' ? 1 : -1 };
 
-    // 🔹 Consulta con paginate
     const result = await ProductModel.paginate(filter, options);
 
-    // 🔹 Renderizar vista con productos y pasar cartId
     res.render('products', {
       title: 'Productos',
+      products: result.docs, // Para compatibilidad con la vista
       payload: result.docs,
       page: result.page,
       totalPages: result.totalPages,
       hasPrevPage: result.hasPrevPage,
       hasNextPage: result.hasNextPage,
-      prevLink: result.hasPrevPage ? `/products?page=${result.prevPage}` : null,
-      nextLink: result.hasNextPage ? `/products?page=${result.nextPage}` : null,
-      cartId: cart._id.toString() // 👈 Se pasa el ID real del carrito
+      prevPage: result.prevPage,
+      nextPage: result.nextPage,
+      prevLink: result.hasPrevPage 
+        ? `?page=${result.prevPage}&limit=${limit}&sort=${sort || ''}&query=${query || ''}` 
+        : null,
+      nextLink: result.hasNextPage 
+        ? `?page=${result.nextPage}&limit=${limit}&sort=${sort || ''}&query=${query || ''}` 
+        : null,
+      cartId: cart._id.toString(),
+      limit,
+      sort,
+      query,
     });
-
   } catch (error) {
     console.error('❌ Error al obtener productos:', error);
     res.status(500).send('Error interno del servidor');
@@ -65,9 +83,17 @@ router.get('/products/:pid', async (req, res) => {
 
     if (!product) return res.status(404).send('Producto no encontrado');
 
+    // ✅ Buscar o crear un carrito (si no existe)
+    let cart = await CartModel.findOne();
+    if (!cart) {
+      cart = await CartModel.create({ products: [] });
+      console.log('🛒 Nuevo carrito creado con ID:', cart._id);
+    }
+
     res.render('productDetail', {
       title: product.title,
-      product
+      product,
+      cartId: cart._id.toString(),
     });
   } catch (error) {
     console.error('❌ Error al obtener el producto:', error);
@@ -86,12 +112,17 @@ router.get('/carts/:cid', async (req, res) => {
 
     res.render('cart', {
       title: 'Carrito',
-      cart
+      cart,
     });
   } catch (error) {
     console.error('❌ Error al obtener el carrito:', error);
     res.status(500).send('Error interno del servidor');
   }
+});
+
+// 🧩 Formulario para agregar productos (solo vista)
+router.get('/add-product', (req, res) => {
+  res.render('addProduct', { title: 'Agregar Producto' });
 });
 
 export default router;

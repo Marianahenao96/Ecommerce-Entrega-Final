@@ -1,0 +1,471 @@
+<div class="container">
+  <div class="form-header">
+    <h1>➕ Agregar Nuevo Producto</h1>
+    <a href="/products" class="btn btn-outline">
+      ← Volver a productos
+    </a>
+  </div>
+
+  <div class="form-container">
+    <form action="/products" method="post" class="product-form" id="productForm">
+      <div class="form-section">
+        <h3>📝 Información Básica</h3>
+        
+        <div class="form-group">
+          <label for="title" class="form-label">Título del Producto *</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            class="form-control" 
+            required 
+            placeholder="Ej: iPhone 15 Pro Max"
+            maxlength="100"
+          >
+          <small class="form-help">Máximo 100 caracteres</small>
+        </div>
+
+        <div class="form-group">
+          <label for="description" class="form-label">Descripción *</label>
+          <textarea 
+            id="description" 
+            name="description" 
+            class="form-control" 
+            required 
+            rows="4"
+            placeholder="Describe las características principales del producto..."
+            maxlength="500"
+          ></textarea>
+          <small class="form-help">Máximo 500 caracteres</small>
+        </div>
+
+        <div class="form-group">
+          <label for="code" class="form-label">Código del Producto *</label>
+          <input 
+            type="text" 
+            id="code" 
+            name="code" 
+            class="form-control" 
+            required 
+            placeholder="Ej: IPH15PM-256GB"
+            pattern="[A-Z0-9-]+"
+            title="Solo letras mayúsculas, números y guiones"
+          >
+          <small class="form-help">Solo letras mayúsculas, números y guiones</small>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>💰 Precio y Stock</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="price" class="form-label">Precio *</label>
+            <div class="input-group">
+              <span class="input-symbol">$</span>
+              <input 
+                type="number" 
+                id="price" 
+                name="price" 
+                class="form-control" 
+                required 
+                min="0" 
+                step="0.01"
+                placeholder="0.00"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="stock" class="form-label">Stock *</label>
+            <input 
+              type="number" 
+              id="stock" 
+              name="stock" 
+              class="form-control" 
+              required 
+              min="0"
+              placeholder="0"
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>🏷️ Categorización</h3>
+        
+        <div class="form-group">
+          <label for="category" class="form-label">Categoría *</label>
+          <select id="category" name="category" class="form-control" required>
+            <option value="">Selecciona una categoría</option>
+            <option value="electronics">Electrónicos</option>
+            <option value="clothing">Ropa</option>
+            <option value="books">Libros</option>
+            <option value="home">Hogar</option>
+            <option value="sports">Deportes</option>
+            <option value="beauty">Belleza</option>
+            <option value="toys">Juguetes</option>
+            <option value="automotive">Automotriz</option>
+            <option value="other">Otros</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Estado del Producto</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="status" value="true" checked>
+              <span class="checkmark"></span>
+              Producto activo (disponible para venta)
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>🖼️ Imágenes</h3>
+        
+        <div class="form-group">
+          <label for="thumbnails" class="form-label">URLs de Imágenes</label>
+          <textarea 
+            id="thumbnails" 
+            name="thumbnails" 
+            class="form-control" 
+            rows="3"
+            placeholder="Ingresa las URLs de las imágenes separadas por comas:&#10;https://ejemplo.com/imagen1.jpg,&#10;https://ejemplo.com/imagen2.jpg"
+          ></textarea>
+          <small class="form-help">Separa múltiples URLs con comas. Las imágenes deben ser accesibles públicamente.</small>
+        </div>
+
+        <div class="image-preview" id="imagePreview" style="display: none;">
+          <h4>Vista previa de imágenes:</h4>
+          <div class="preview-images" id="previewImages"></div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+          🔄 Limpiar formulario
+        </button>
+        <button type="submit" class="btn btn-primary">
+          ✅ Crear Producto
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Validación en tiempo real
+  document.getElementById('productForm').addEventListener('submit', function(e) {
+    const title = document.getElementById('title').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const code = document.getElementById('code').value.trim();
+    const price = parseFloat(document.getElementById('price').value);
+    const stock = parseInt(document.getElementById('stock').value);
+    const category = document.getElementById('category').value;
+
+    if (!title || !description || !code || !price || !stock || !category) {
+      e.preventDefault();
+      alert('Por favor, completa todos los campos obligatorios.');
+      return;
+    }
+
+    if (price < 0) {
+      e.preventDefault();
+      alert('El precio no puede ser negativo.');
+      return;
+    }
+
+    if (stock < 0) {
+      e.preventDefault();
+      alert('El stock no puede ser negativo.');
+      return;
+    }
+  });
+
+  // Vista previa de imágenes
+  document.getElementById('thumbnails').addEventListener('input', function() {
+    const urls = this.value.split(',').map(url => url.trim()).filter(url => url);
+    const preview = document.getElementById('imagePreview');
+    const previewImages = document.getElementById('previewImages');
+    
+    if (urls.length > 0) {
+      preview.style.display = 'block';
+      previewImages.innerHTML = '';
+      
+      urls.forEach(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = 'Vista previa';
+        img.className = 'preview-img';
+        img.onerror = function() {
+          this.style.display = 'none';
+        };
+        previewImages.appendChild(img);
+      });
+    } else {
+      preview.style.display = 'none';
+    }
+  });
+
+  // Función para limpiar formulario
+  function resetForm() {
+    if (confirm('¿Estás seguro de que quieres limpiar el formulario?')) {
+      document.getElementById('productForm').reset();
+      document.getElementById('imagePreview').style.display = 'none';
+    }
+  }
+
+  // Generar código automático basado en título
+  document.getElementById('title').addEventListener('input', function() {
+    const codeField = document.getElementById('code');
+    if (!codeField.value) {
+      const title = this.value.trim();
+      if (title) {
+        const code = title.toUpperCase()
+          .replace(/[^A-Z0-9\s]/g, '')
+          .replace(/\s+/g, '-')
+          .substring(0, 15);
+        codeField.value = code;
+      }
+    }
+  });
+</script>
+
+<style>
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  .form-header h1 {
+    margin: 0;
+    color: #333;
+    font-size: 28px;
+  }
+
+  .form-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+
+  .product-form {
+    padding: 30px;
+  }
+
+  .form-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f3f4;
+  }
+
+  .form-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .form-section h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+  }
+
+  .form-control:invalid {
+    border-color: #dc3545;
+  }
+
+  .input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-symbol {
+    position: absolute;
+    left: 16px;
+    color: #666;
+    font-weight: 500;
+    z-index: 1;
+  }
+
+  .input-group .form-control {
+    padding-left: 40px;
+  }
+
+  .form-help {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #666;
+  }
+
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #007bff;
+  }
+
+  .image-preview {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .image-preview h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .preview-images {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .preview-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 2px solid #e9ecef;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #545b62;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: #007bff;
+    border: 2px solid #007bff;
+  }
+
+  .btn-outline:hover {
+    background: #007bff;
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .form-header {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .product-form {
+      padding: 20px;
+    }
+  }
+</style>
