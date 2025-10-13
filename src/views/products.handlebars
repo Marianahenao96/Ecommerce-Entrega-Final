@@ -77,6 +77,16 @@
               <button type="submit" class="btn btn-success">🛒 Agregar al carrito</button>
             </form>
           {{/if}}
+
+          <button 
+            type="button" 
+            class="btn btn-danger delete-btn" 
+            data-product-id="{{this._id}}" 
+            data-product-title="{{this.title}}"
+            onclick="deleteProduct('{{this._id}}', '{{this.title}}')"
+          >
+            🗑️ Eliminar
+          </button>
         </div>
       </div>
     {{else}}
@@ -332,6 +342,20 @@
     flex: 1;
   }
 
+  .btn-danger {
+    background: #dc3545;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+  }
+
+  .delete-product-form {
+    margin: 0;
+  }
+
   @media (max-width: 768px) {
     .page-header {
       flex-direction: column;
@@ -356,5 +380,206 @@
       flex-direction: column;
       gap: 15px;
     }
+
+    .product-actions {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .delete-product-form {
+      width: 100%;
+    }
+
+    .delete-product-form button {
+      width: 100%;
+    }
   }
 </style>
+
+<script>
+  async function deleteProduct(productId, productTitle) {
+    // Confirmar eliminación
+    const confirmed = confirm(`¿Estás seguro de que quieres eliminar el producto "${productTitle}"?\n\nEsta acción no se puede deshacer.`);
+    
+    if (!confirmed) {
+      return;
+    }
+
+    // Encontrar el elemento del producto
+    const productElement = document.querySelector(`[data-product-id="${productId}"]`).closest('.product-card');
+    const deleteBtn = document.querySelector(`[data-product-id="${productId}"]`);
+    
+    // Mostrar estado de carga
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '⏳ Eliminando...';
+    productElement.style.opacity = '0.6';
+    productElement.style.pointerEvents = 'none';
+
+    try {
+      // Realizar petición AJAX
+      const response = await fetch(`/products/api/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.status === 'success') {
+        // Eliminar elemento del DOM con animación
+        productElement.style.transition = 'all 0.3s ease-out';
+        productElement.style.transform = 'scale(0.8)';
+        productElement.style.opacity = '0';
+        
+        setTimeout(() => {
+          productElement.remove();
+          
+          // Verificar si no quedan productos
+          const remainingProducts = document.querySelectorAll('.product-card');
+          if (remainingProducts.length === 0) {
+            showNoProductsMessage();
+          }
+          
+          // Actualizar contador de productos
+          updateProductCount();
+          
+          // Mostrar mensaje de éxito
+          showSuccessMessage(`Producto "${productTitle}" eliminado exitosamente`);
+        }, 300);
+        
+      } else {
+        // Mostrar error
+        showErrorMessage(result.message || 'Error al eliminar el producto');
+        
+        // Restaurar botón
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = '🗑️ Eliminar';
+        productElement.style.opacity = '1';
+        productElement.style.pointerEvents = 'auto';
+      }
+      
+    } catch (error) {
+      console.error('Error:', error);
+      showErrorMessage('Error de conexión. Intenta nuevamente.');
+      
+      // Restaurar botón
+      deleteBtn.disabled = false;
+      deleteBtn.innerHTML = '🗑️ Eliminar';
+      productElement.style.opacity = '1';
+      productElement.style.pointerEvents = 'auto';
+    }
+  }
+
+  function showNoProductsMessage() {
+    const productGrid = document.querySelector('.product-grid');
+    productGrid.innerHTML = `
+      <div class="no-products">
+        <p>😢 No hay productos disponibles</p>
+        <a href="/products/view/add" class="btn btn-primary">➕ Agregar Producto</a>
+      </div>
+    `;
+  }
+
+  function updateProductCount() {
+    const productCount = document.querySelectorAll('.product-card').length;
+    const paginationInfo = document.querySelector('.pagination-info p');
+    if (paginationInfo) {
+      paginationInfo.textContent = `Total de productos: ${productCount}`;
+    }
+  }
+
+  function showSuccessMessage(message) {
+    showNotification(message, 'success');
+  }
+
+  function showErrorMessage(message) {
+    showNotification(message, 'error');
+  }
+
+  function showNotification(message, type) {
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+      <span>${message}</span>
+      <button onclick="this.parentElement.remove()" class="close-btn">&times;</button>
+    `;
+    
+    // Agregar estilos
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease-out;
+    `;
+    
+    if (type === 'success') {
+      notification.style.background = '#28a745';
+    } else {
+      notification.style.background = '#dc3545';
+    }
+    
+    // Agregar al DOM
+    document.body.appendChild(notification);
+    
+    // Auto-remover después de 4 segundos
+    setTimeout(() => {
+      if (notification.parentElement) {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+      }
+    }, 4000);
+  }
+
+  // Agregar animaciones CSS
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0;
+      margin-left: auto;
+    }
+    
+    .close-btn:hover {
+      opacity: 0.8;
+    }
+  `;
+  document.head.appendChild(style);
+</script>

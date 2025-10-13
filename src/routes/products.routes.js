@@ -6,6 +6,7 @@ const router = Router();
 // ✅ API Routes - Productos con paginación
 router.get('/api', ctrl.getProducts);
 router.get('/api/:pid', ctrl.getProductById);
+router.delete('/api/:pid', ctrl.deleteProduct);
 
 // ✅ Vista Routes - Productos
 router.get('/', ctrl.getProducts);

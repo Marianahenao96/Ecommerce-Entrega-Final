@@ -231,11 +231,47 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   try {
     const { pid } = req.params;
+    
+    // Verificar que el producto existe
+    const product = await ProductModel.findById(pid);
+    if (!product) {
+      if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ 
+          status: 'error', 
+          message: 'Producto no encontrado' 
+        });
+      }
+      return res.status(404).send('Producto no encontrado');
+    }
+
+    // Eliminar el producto
     const result = await ProductModel.findByIdAndDelete(pid);
-    if (!result) return res.status(404).send('Producto no encontrado');
+    
+    console.log(`✅ Producto eliminado: ${result.title} (ID: ${pid})`);
+
+    if (req.path.startsWith('/api/')) {
+      return res.json({ 
+        status: 'success', 
+        message: 'Producto eliminado exitosamente',
+        deletedProduct: {
+          id: result._id,
+          title: result.title,
+          code: result.code
+        }
+      });
+    }
+
     res.redirect('/products');
   } catch (error) {
     console.error('❌ Error al eliminar producto:', error);
+    
+    if (req.path.startsWith('/api/')) {
+      return res.status(500).json({ 
+        status: 'error', 
+        message: 'Error interno del servidor al eliminar producto' 
+      });
+    }
+    
     res.status(500).send('Error al eliminar producto');
   }
 };
