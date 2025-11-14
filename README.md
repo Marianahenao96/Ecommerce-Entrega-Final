@@ -1,334 +1,284 @@
-# 🛒 Ecommerce API - Backend con MongoDB
+# 🛒 Ecommerce API - Backend con Autenticación
 
-Una API completa de ecommerce desarrollada con Node.js, Express, MongoDB y Handlebars. Implementa gestión de productos y carritos de compras con paginación, filtros avanzados, vistas web responsivas y persistencia de datos.
+API RESTful de ecommerce desarrollada con Node.js, Express y MongoDB. Incluye gestión de productos, carritos de compras, sistema completo de autenticación y autorización con JWT, y vistas web responsivas.
 
-## 🚀 Características Principales
+## 📋 Características
 
-### ✅ **Gestión de Productos**
-- 📦 CRUD completo de productos
-- 🔍 Paginación con límite personalizable
-- 🏷️ Filtros por categoría y disponibilidad
-- 📊 Ordenamiento por precio (ascendente/descendente)
-- 🖼️ Soporte para múltiples imágenes
-- ✅ Validaciones robustas de datos
+- ✅ **CRUD de Productos**: Gestión completa con paginación y filtros
+- ✅ **CRUD de Carritos**: Gestión de carritos de compras
+- ✅ **CRUD de Usuarios**: Gestión completa de usuarios
+- ✅ **Autenticación JWT**: Sistema de login con tokens JWT
+- ✅ **Encriptación de Contraseñas**: Usando bcrypt.hashSync
+- ✅ **Estrategias Passport**: Autenticación y autorización con Passport.js
+- ✅ **Vistas Web**: Interfaz web con Handlebars (login, registro, perfil)
+- ✅ **API RESTful**: Endpoints completos y documentados
 
-### ✅ **Gestión de Carritos**
-- 🛒 Creación y gestión de carritos
-- ➕ Agregar productos al carrito
-- 🔢 Actualización de cantidades
-- 🗑️ Eliminación de productos específicos
-- 🧹 Vaciar carrito completo
-- 📊 Cálculo automático de totales
+## 🛠️ Tecnologías
 
-### ✅ **Interfaz Web**
-- 🎨 Vistas responsivas con Handlebars
-- 📱 Diseño moderno y mobile-first
-- 🔍 Filtros interactivos
-- 📄 Navegación con paginación
-- 🖼️ Vista de detalle de productos
-- 🛒 Carrito visual con gestión completa
+- **Node.js** + **Express.js**
+- **MongoDB** + **Mongoose**
+- **Passport.js** + **JWT** (jsonwebtoken, passport-jwt)
+- **bcrypt** (encriptación de contraseñas)
+- **Handlebars** (templates)
+- **Bootstrap 5** (UI)
 
-### ✅ **API RESTful**
-- 🌐 Endpoints REST completos
-- 📋 Respuestas JSON estructuradas
-- 🔒 Validaciones de datos
-- ⚡ Manejo de errores robusto
-- 📊 Formato de respuesta consistente
+## 🚀 Instalación
 
-## 🛠️ Tecnologías Utilizadas
-
-- **Backend**: Node.js, Express.js
-- **Base de Datos**: MongoDB con Mongoose
-- **Templates**: Handlebars
-- **Paginación**: mongoose-paginate-v2
-- **Estilos**: CSS3 (Grid, Flexbox)
-- **Frontend**: JavaScript Vanilla
-
-## 📋 Prerrequisitos
-
-- Node.js (v14 o superior)
-- MongoDB (local o Atlas)
-- npm o yarn
-
-## 🚀 Instalación y Configuración
-
-### 1. **Clonar el repositorio**
+### 1. Clonar el repositorio
 ```bash
 git clone <url-del-repositorio>
 cd ecommerce_entrega_final
 ```
 
-### 2. **Instalar dependencias**
+### 2. Instalar dependencias
 ```bash
 npm install
 ```
 
-### 3. **Configurar variables de entorno**
-```bash
-# Copiar archivo de ejemplo
-cp .env.example .env
+### 3. Configurar variables de entorno
 
-# Editar .env con tu configuración
+Crear archivo `.env` en la raíz del proyecto:
+
+```env
 MONGO_URI=mongodb://localhost:27017/ecommerce
 PORT=8080
+JWT_SECRET=tu_secret_key_super_segura_cambiar_en_produccion
 ```
 
-### 4. **Cargar datos de ejemplo (opcional)**
-```bash
-npm run seed
-```
+### 4. Ejecutar el proyecto
 
-### 5. **Ejecutar el proyecto**
 ```bash
-# Desarrollo
+# Desarrollo (con nodemon)
 npm run dev
 
 # Producción
 npm start
 ```
 
-## 🌐 Endpoints de la API
+El servidor estará disponible en `http://localhost:8080`
 
-### **Productos**
+## 📡 Endpoints de la API
 
-#### **Obtener productos con paginación y filtros**
+### **Usuarios**
+
+#### Crear usuario
 ```http
-GET /products/api?limit=10&page=1&sort=asc&query=electronics
+POST /api/users
+Content-Type: application/json
+
+{
+  "first_name": "Juan",
+  "last_name": "Pérez",
+  "email": "juan@example.com",
+  "age": 25,
+  "password": "password123",
+  "role": "user"
+}
 ```
 
-**Parámetros de consulta:**
-- `limit` (opcional): Número de productos por página (default: 10)
-- `page` (opcional): Número de página (default: 1)
-- `sort` (opcional): Ordenamiento por precio (`asc`/`desc`)
-- `query` (opcional): Filtro por categoría o `available`
+#### Obtener usuarios
+```http
+GET /api/users              # Todos los usuarios
+GET /api/users/:uid         # Usuario por ID
+```
+
+#### Actualizar usuario
+```http
+PUT /api/users/:uid
+Content-Type: application/json
+
+{
+  "first_name": "Juan Carlos",
+  "age": 26
+}
+```
+
+#### Eliminar usuario
+```http
+DELETE /api/users/:uid
+```
+
+### **Sesiones (Autenticación)**
+
+#### Login
+```http
+POST /api/sessions/login
+Content-Type: application/json
+
+{
+  "email": "juan@example.com",
+  "password": "password123"
+}
+```
 
 **Respuesta:**
 ```json
 {
   "status": "success",
-  "payload": [...],
-  "totalPages": 5,
-  "prevPage": 1,
-  "nextPage": 3,
-  "page": 2,
-  "hasPrevPage": true,
-  "hasNextPage": true,
-  "prevLink": "?page=1&limit=10&sort=asc&query=electronics",
-  "nextLink": "?page=3&limit=10&sort=asc&query=electronics"
+  "message": "Login exitoso",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": { ... }
 }
 ```
 
-#### **Obtener producto por ID**
+#### Obtener usuario actual
 ```http
-GET /products/api/:pid
+GET /api/sessions/current
+Authorization: Bearer <token>
 ```
 
-#### **Crear producto**
-```http
-POST /products/api
-Content-Type: application/json
-
+**Respuesta:**
+```json
 {
-  "title": "iPhone 15 Pro",
-  "description": "El último iPhone con tecnología avanzada",
-  "code": "IPH15PRO-256",
-  "price": 999.99,
-  "stock": 50,
-  "category": "electronics",
-  "status": true,
-  "thumbnails": [
-    "https://ejemplo.com/imagen1.jpg",
-    "https://ejemplo.com/imagen2.jpg"
-  ]
+  "status": "success",
+  "user": {
+    "_id": "...",
+    "first_name": "Juan",
+    "last_name": "Pérez",
+    "email": "juan@example.com",
+    "age": 25,
+    "role": "user",
+    "cart": "..."
+  }
 }
 ```
+
+### **Productos**
+
+```http
+GET    /products/api              # Listar productos (con paginación)
+GET    /products/api/:pid         # Obtener producto por ID
+POST   /products/api              # Crear producto
+PUT    /products/api/:pid          # Actualizar producto
+DELETE /products/api/:pid          # Eliminar producto
+```
+
+**Parámetros de consulta para listar:**
+- `limit`: Número de productos por página (default: 10)
+- `page`: Número de página (default: 1)
+- `sort`: Ordenamiento (`asc`/`desc`)
+- `query`: Filtro por categoría o `available`
 
 ### **Carritos**
 
-#### **Crear carrito**
 ```http
-POST /api/carts
-```
-
-#### **Obtener carrito**
-```http
-GET /api/carts/:cid
-```
-
-#### **Agregar producto al carrito**
-```http
-POST /api/carts/:cid/products/:pid
-Content-Type: application/json
-
-{
-  "quantity": 2
-}
-```
-
-#### **Actualizar cantidad de producto**
-```http
-PUT /api/carts/:cid/products/:pid
-Content-Type: application/json
-
-{
-  "quantity": 5
-}
-```
-
-#### **Eliminar producto del carrito**
-```http
-DELETE /api/carts/:cid/products/:pid
-```
-
-#### **Actualizar carrito completo**
-```http
-PUT /api/carts/:cid
-Content-Type: application/json
-
-{
-  "products": [
-    {
-      "product": "productId1",
-      "quantity": 2
-    },
-    {
-      "product": "productId2", 
-      "quantity": 1
-    }
-  ]
-}
-```
-
-#### **Vaciar carrito**
-```http
-DELETE /api/carts/:cid
+POST   /api/carts                           # Crear carrito
+GET    /api/carts/:cid                      # Obtener carrito
+POST   /api/carts/:cid/products/:pid        # Agregar producto
+PUT    /api/carts/:cid/products/:pid        # Actualizar cantidad
+DELETE /api/carts/:cid/products/:pid         # Eliminar producto
+PUT    /api/carts/:cid                      # Actualizar carrito completo
+DELETE /api/carts/:cid                       # Vaciar carrito
 ```
 
 ## 🎨 Vistas Web
 
-### **Rutas de Vistas**
-- `/products` - Lista de productos con paginación y filtros
-- `/products/:pid` - Detalle de producto individual
-- `/products/view/add` - Formulario para crear producto
-- `/carts/:cid` - Vista del carrito específico
+- `/products` - Lista de productos con paginación
+- `/products/:pid` - Detalle de producto
+- `/carts/:cid` - Vista del carrito
+- `/register` - Registro de usuario
+- `/login` - Inicio de sesión
+- `/profile` - Perfil del usuario (requiere autenticación)
 
-### **Características de las Vistas**
-- 📱 **Responsive Design**: Adaptable a móviles y tablets
-- 🔍 **Filtros Interactivos**: Por categoría, disponibilidad y ordenamiento
-- 📄 **Paginación Visual**: Navegación intuitiva entre páginas
-- 🛒 **Carrito Visual**: Gestión completa con totales automáticos
-- ➕ **Formulario de Productos**: Creación con validaciones en tiempo real
-
-## 🏷️ Categorías de Productos
-
-- `electronics` - Electrónicos
-- `clothing` - Ropa
-- `books` - Libros
-- `home` - Hogar
-- `sports` - Deportes
-- `beauty` - Belleza
-- `toys` - Juguetes
-- `automotive` - Automotriz
-- `other` - Otros
-
-## 📊 Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
 ```
 src/
 ├── controllers/
 │   ├── productController.js    # Lógica de productos
-│   └── cartController.js       # Lógica de carritos
+│   ├── cartController.js       # Lógica de carritos
+│   └── userController.js       # Lógica de usuarios y autenticación
 ├── models/
 │   ├── Product.js              # Modelo de productos
-│   └── Cart.js                 # Modelo de carritos
+│   ├── Cart.js                 # Modelo de carritos
+│   └── User.js                 # Modelo de usuarios
 ├── routes/
 │   ├── products.routes.js      # Rutas de productos
 │   ├── carts.routes.js         # Rutas de carritos
-│   └── views.routes.js         # Rutas de vistas
+│   ├── users.routes.js         # Rutas CRUD de usuarios
+│   ├── sessions.routes.js      # Rutas de autenticación
+│   └── views.routes.js         # Rutas de vistas web
 ├── views/
 │   ├── layouts/
 │   │   └── main.handlebars     # Layout principal
 │   ├── products.handlebars     # Vista de productos
-│   ├── productDetail.handlebars # Vista de detalle
-│   ├── addProduct.handlebars   # Formulario de producto
-│   └── cart.handlebars         # Vista del carrito
+│   ├── productDetail.handlebars
+│   ├── cart.handlebars
+│   ├── register.handlebars     # Vista de registro
+│   ├── login.handlebars        # Vista de login
+│   └── profile.handlebars      # Vista de perfil
+├── config/
+│   ├── db.js                   # Configuración de BD
+│   └── passport.config.js      # Configuración de Passport
 ├── public/
 │   └── css/
-│       └── styles.css          # Estilos globales
-├── config/
-│   └── db.js                   # Configuración de BD
+│       └── styles.css
 ├── app.js                      # Configuración de Express
 └── server.js                   # Servidor principal
 ```
 
-## 🔧 Scripts Disponibles
+## 🔐 Sistema de Autenticación
+
+### Modelo de Usuario
+
+El modelo `User` contiene:
+- `first_name`: String (requerido)
+- `last_name`: String (requerido)
+- `email`: String (requerido, único)
+- `age`: Number (requerido)
+- `password`: String (requerido, encriptado con bcrypt)
+- `cart`: ObjectId (referencia a Cart)
+- `role`: String (default: 'user', valores: 'user' o 'admin')
+
+### Encriptación de Contraseñas
+
+- Las contraseñas se encriptan automáticamente usando `bcrypt.hashSync` antes de guardarse
+- El hash se genera con un factor de costo de 10
+- La encriptación ocurre en el hook `pre('save')` del modelo
+
+### Estrategias de Passport
+
+- **Estrategia `jwt`**: Para autenticación general con tokens JWT
+- **Estrategia `current`**: Para validar usuarios logueados en `/api/sessions/current`
+- Ambas estrategias buscan el usuario usando el `userId` del payload del token
+
+### Sistema de Login
+
+1. El usuario envía email y contraseña a `POST /api/sessions/login`
+2. Se valida la contraseña usando `bcrypt.compareSync`
+3. Se genera un token JWT con el ID del usuario
+4. El token expira en 24 horas
+5. El token debe enviarse en el header: `Authorization: Bearer <token>`
+
+### Ruta de Validación
+
+- `GET /api/sessions/current`: Valida el token JWT y devuelve los datos del usuario
+- Usa la estrategia `current` de Passport
+- Retorna error 401 si el token es inválido o no existe
+
+## 📝 Scripts Disponibles
 
 ```bash
-# Desarrollo con nodemon
-npm run dev
-
-# Iniciar servidor
-npm start
-
-# Cargar datos de ejemplo
-npm run seed
-
-# Instalar dependencias
-npm install
+npm run dev      # Desarrollo con nodemon
+npm start        # Producción
+npm run seed     # Cargar datos de ejemplo
 ```
 
-## 🌟 Funcionalidades Destacadas
+## 🔒 Seguridad
 
-### **Paginación Avanzada**
-- Límite personalizable de elementos por página
-- Navegación con enlaces directos
-- Información de páginas totales y actual
-- Persistencia de filtros en la navegación
-
-### **Filtros Inteligentes**
-- Filtro por categorías predefinidas
-- Filtro de productos disponibles (con stock)
-- Ordenamiento por precio
-- Combinación de múltiples filtros
-
-### **Validaciones Robustas**
-- Códigos de producto únicos
-- Validación de precios y stock positivos
-- Categorías válidas
-- URLs de imágenes válidas
-
-### **Experiencia de Usuario**
-- Formularios con validación en tiempo real
-- Vista previa de imágenes
-- Generación automática de códigos
-- Diseño responsive y accesible
-
-## 🚀 Próximas Mejoras
-
-- [ ] Sistema de autenticación de usuarios
-- [ ] Proceso de checkout completo
-- [ ] Sistema de reviews y ratings
-- [ ] Búsqueda por texto
-- [ ] Dashboard administrativo
-- [ ] Integración con pasarelas de pago
-- [ ] Sistema de notificaciones
-- [ ] API de reportes y analytics
-
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+- Contraseñas encriptadas con bcrypt.hashSync
+- Tokens JWT con expiración de 24 horas
+- Validación de tokens en rutas protegidas
+- Estrategias de Passport para autenticación
+- Manejo seguro de errores de autenticación
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+Este proyecto está bajo la Licencia MIT.
 
 ## 👨‍💻 Autor
 
-**Mariana** - [GitHub](https://github.com/tu-usuario)
+**Mariana**
 
 ---
 

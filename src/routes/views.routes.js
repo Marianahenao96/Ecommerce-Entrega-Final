@@ -125,4 +125,17 @@ router.get('/add-product', (req, res) => {
   res.render('addProduct', { title: 'Agregar Producto' });
 });
 
+// 👤 Vistas de autenticación
+router.get('/register', (req, res) => {
+  res.render('register', { title: 'Registro' });
+});
+
+router.get('/login', (req, res) => {
+  res.render('login', { title: 'Iniciar Sesión' });
+});
+
+router.get('/profile', (req, res) => {
+  res.render('profile', { title: 'Mi Perfil' });
+});
+
 export default router;

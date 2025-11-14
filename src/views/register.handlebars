@@ -1,0 +1,100 @@
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow">
+      <div class="card-body p-5">
+        <h2 class="card-title text-center mb-4">Registro de Usuario</h2>
+        
+        <form id="registerForm">
+          <div class="mb-3">
+            <label for="first_name" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="first_name" name="first_name" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="last_name" class="form-label">Apellido</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="age" class="form-label">Edad</label>
+            <input type="number" class="form-control" id="age" name="age" min="0" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="role" class="form-label">Rol</label>
+            <select class="form-select" id="role" name="role">
+              <option value="user" selected>Usuario</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+
+          <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
+          <div id="registerSuccess" class="alert alert-success d-none" role="alert"></div>
+
+          <button type="submit" class="btn btn-primary w-100 mb-3">Registrarse</button>
+        </form>
+
+        <div class="text-center">
+          <p class="mb-0">¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const errorDiv = document.getElementById('registerError');
+    const successDiv = document.getElementById('registerSuccess');
+    errorDiv.classList.add('d-none');
+    successDiv.classList.add('d-none');
+
+    const formData = {
+      first_name: document.getElementById('first_name').value,
+      last_name: document.getElementById('last_name').value,
+      email: document.getElementById('email').value,
+      age: parseInt(document.getElementById('age').value),
+      password: document.getElementById('password').value,
+      role: document.getElementById('role').value
+    };
+
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        successDiv.textContent = 'Usuario registrado exitosamente. Redirigiendo al login...';
+        successDiv.classList.remove('d-none');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      } else {
+        errorDiv.textContent = data.message || 'Error al registrar usuario';
+        errorDiv.classList.remove('d-none');
+      }
+    } catch (error) {
+      errorDiv.textContent = 'Error de conexión. Por favor intenta nuevamente.';
+      errorDiv.classList.remove('d-none');
+    }
+  });
+</script>
+

@@ -1,0 +1,83 @@
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow">
+      <div class="card-body p-5">
+        <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+        
+        <form id="loginForm">
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+
+          <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+          <div id="loginSuccess" class="alert alert-success d-none" role="alert"></div>
+
+          <button type="submit" class="btn btn-primary w-100 mb-3">Iniciar Sesión</button>
+        </form>
+
+        <div class="text-center">
+          <p class="mb-0">¿No tienes cuenta? <a href="/register">Regístrate aquí</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Verificar si ya hay un token guardado
+  if (localStorage.getItem('token')) {
+    window.location.href = '/profile';
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const errorDiv = document.getElementById('loginError');
+    const successDiv = document.getElementById('loginSuccess');
+    errorDiv.classList.add('d-none');
+    successDiv.classList.add('d-none');
+
+    const formData = {
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value
+    };
+
+    try {
+      const response = await fetch('/api/sessions/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Guardar el token en localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        successDiv.textContent = 'Login exitoso. Redirigiendo...';
+        successDiv.classList.remove('d-none');
+        
+        setTimeout(() => {
+          window.location.href = '/profile';
+        }, 1000);
+      } else {
+        errorDiv.textContent = data.message || 'Credenciales inválidas';
+        errorDiv.classList.remove('d-none');
+      }
+    } catch (error) {
+      errorDiv.textContent = 'Error de conexión. Por favor intenta nuevamente.';
+      errorDiv.classList.remove('d-none');
+    }
+  });
+</script>
+

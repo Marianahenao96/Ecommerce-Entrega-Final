@@ -1,0 +1,133 @@
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white">
+        <h3 class="card-title mb-0">Mi Perfil</h3>
+      </div>
+      <div class="card-body">
+        <div id="loading" class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+
+        <div id="userInfo" class="d-none">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Nombre:</strong>
+              <p id="firstName" class="mb-0"></p>
+            </div>
+            <div class="col-md-6">
+              <strong>Apellido:</strong>
+              <p id="lastName" class="mb-0"></p>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Email:</strong>
+              <p id="email" class="mb-0"></p>
+            </div>
+            <div class="col-md-6">
+              <strong>Edad:</strong>
+              <p id="age" class="mb-0"></p>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Rol:</strong>
+              <p id="role" class="mb-0">
+                <span class="badge bg-secondary" id="roleBadge"></span>
+              </p>
+            </div>
+            <div class="col-md-6">
+              <strong>ID del Carrito:</strong>
+              <p id="cartId" class="mb-0"></p>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button id="logoutBtn" class="btn btn-danger">Cerrar Sesión</button>
+            <a href="/products" class="btn btn-secondary ms-2">Ver Productos</a>
+          </div>
+        </div>
+
+        <div id="error" class="alert alert-danger d-none" role="alert"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Función para obtener el usuario actual
+  async function loadUserProfile() {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/sessions/current', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        document.getElementById('loading').classList.add('d-none');
+        document.getElementById('userInfo').classList.remove('d-none');
+
+        // Mostrar información del usuario
+        document.getElementById('firstName').textContent = data.user.first_name;
+        document.getElementById('lastName').textContent = data.user.last_name;
+        document.getElementById('email').textContent = data.user.email;
+        document.getElementById('age').textContent = data.user.age;
+        
+        const roleBadge = document.getElementById('roleBadge');
+        roleBadge.textContent = data.user.role === 'admin' ? 'Administrador' : 'Usuario';
+        roleBadge.className = data.user.role === 'admin' ? 'badge bg-danger' : 'badge bg-secondary';
+
+        if (data.user.cart) {
+          const cartId = typeof data.user.cart === 'object' ? data.user.cart._id : data.user.cart;
+          document.getElementById('cartId').innerHTML = `<a href="/carts/${cartId}" class="text-decoration-none">${cartId}</a>`;
+        } else {
+          document.getElementById('cartId').innerHTML = '<span class="text-muted">No tiene carrito asignado</span>';
+        }
+
+        // Actualizar localStorage con los datos actualizados
+        localStorage.setItem('user', JSON.stringify(data.user));
+      } else {
+        // Token inválido o expirado
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        document.getElementById('loading').classList.add('d-none');
+        document.getElementById('error').textContent = data.message || 'Sesión expirada. Por favor inicia sesión nuevamente.';
+        document.getElementById('error').classList.remove('d-none');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      }
+    } catch (error) {
+      document.getElementById('loading').classList.add('d-none');
+      document.getElementById('error').textContent = 'Error al cargar el perfil. Por favor intenta nuevamente.';
+      document.getElementById('error').classList.remove('d-none');
+    }
+  }
+
+  // Función para cerrar sesión
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  });
+
+  // Cargar perfil al cargar la página
+  loadUserProfile();
+</script>
+

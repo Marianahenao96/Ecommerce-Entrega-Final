@@ -4,10 +4,15 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import methodOverride from 'method-override';
 
+// 🔹 Passport
+import './config/passport.config.js';
+
 // 🔹 Rutas
 import productsRouter from './routes/products.routes.js';
 import cartsRouter from './routes/carts.routes.js';
 import viewsRouter from './routes/views.routes.js';
+import sessionsRouter from './routes/sessions.routes.js';
+import usersRouter from './routes/users.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,6 +43,8 @@ app.set('views', path.join(__dirname, 'views'));
 // 🔹 Rutas principales
 app.use('/products', productsRouter); // 👈 Aquí es donde renderiza los productos
 app.use('/api/carts', cartsRouter);
+app.use('/api/sessions', sessionsRouter);
+app.use('/api/users', usersRouter);
 app.use('/', viewsRouter);
 
 // 🔹 Redirección principal
