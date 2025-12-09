@@ -1,4 +1,4 @@
-import ProductModel from '../models/Product.js';
+import productRepository from '../repositories/productRepository.js';
 
 // ✅ Obtener todos los productos con paginación y filtros
 export const getProducts = async (req, res) => {
@@ -38,7 +38,7 @@ export const getProducts = async (req, res) => {
     }
 
     // Realizar la consulta con paginación
-    const result = await ProductModel.paginate(filter, options);
+    const result = await productRepository.getProducts(filter, options);
 
     // Formatear respuesta según especificaciones
     const response = {
@@ -89,7 +89,7 @@ export const getProducts = async (req, res) => {
 export const getProductById = async (req, res) => {
   try {
     const { pid } = req.params;
-    const product = await ProductModel.findById(pid).lean();
+    const product = await productRepository.getProductById(pid);
 
     if (!product) {
       if (req.path.startsWith('/api/')) {
@@ -135,17 +135,7 @@ export const createProduct = async (req, res) => {
       return res.status(400).send('Todos los campos son obligatorios');
     }
 
-    // Validar que el código sea único
-    const existingProduct = await ProductModel.findOne({ code });
-    if (existingProduct) {
-      if (req.path.startsWith('/api/')) {
-        return res.status(400).json({ 
-          status: 'error', 
-          message: 'Ya existe un producto con este código' 
-        });
-      }
-      return res.status(400).send('Ya existe un producto con este código');
-    }
+    // Validar que el código sea único (el repository lanza error si existe)
 
     // Validar precio y stock
     if (parseFloat(price) < 0) {
@@ -178,7 +168,7 @@ export const createProduct = async (req, res) => {
     }
 
     // Crear el producto
-    const product = await ProductModel.create({
+    const product = await productRepository.createProduct({
       title: title.trim(),
       description: description.trim(),
       code: code.trim().toUpperCase(),
@@ -203,6 +193,16 @@ export const createProduct = async (req, res) => {
   } catch (error) {
     console.error('❌ Error al crear producto:', error);
     
+    if (error.message.includes('Ya existe un producto con este código')) {
+      if (req.path.startsWith('/api/')) {
+        return res.status(400).json({ 
+          status: 'error', 
+          message: error.message
+        });
+      }
+      return res.status(400).send(error.message);
+    }
+    
     if (req.path.startsWith('/api/')) {
       return res.status(500).json({ 
         status: 'error', 
@@ -218,7 +218,7 @@ export const createProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { pid } = req.params;
-    const result = await ProductModel.findByIdAndUpdate(pid, req.body, { new: true });
+    const result = await productRepository.updateProduct(pid, req.body);
     if (!result) return res.status(404).send('Producto no encontrado');
     res.redirect('/products');
   } catch (error) {
@@ -232,20 +232,8 @@ export const deleteProduct = async (req, res) => {
   try {
     const { pid } = req.params;
     
-    // Verificar que el producto existe
-    const product = await ProductModel.findById(pid);
-    if (!product) {
-      if (req.path.startsWith('/api/')) {
-        return res.status(404).json({ 
-          status: 'error', 
-          message: 'Producto no encontrado' 
-        });
-      }
-      return res.status(404).send('Producto no encontrado');
-    }
-
-    // Eliminar el producto
-    const result = await ProductModel.findByIdAndDelete(pid);
+    // Eliminar el producto (el repository verifica que existe)
+    const result = await productRepository.deleteProduct(pid);
     
     console.log(`✅ Producto eliminado: ${result.title} (ID: ${pid})`);
 
@@ -265,6 +253,16 @@ export const deleteProduct = async (req, res) => {
   } catch (error) {
     console.error('❌ Error al eliminar producto:', error);
     
+    if (error.message.includes('no encontrado')) {
+      if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ 
+          status: 'error', 
+          message: error.message
+        });
+      }
+      return res.status(404).send(error.message);
+    }
+    
     if (req.path.startsWith('/api/')) {
       return res.status(500).json({ 
         status: 'error', 
@@ -281,12 +279,12 @@ export const decreaseStock = async (req, res) => {
   try {
     const { pid } = req.params;
     const { amount } = req.body;
-    const product = await ProductModel.findById(pid);
-
+    
+    const product = await productRepository.getProductById(pid);
     if (!product) return res.status(404).send('Producto no encontrado');
 
-    product.stock = Math.max(product.stock - (Number(amount) || 1), 0);
-    await product.save();
+    const newStock = Math.max(product.stock - (Number(amount) || 1), 0);
+    await productRepository.updateProduct(pid, { stock: newStock });
 
     res.redirect('/products');
   } catch (error) {

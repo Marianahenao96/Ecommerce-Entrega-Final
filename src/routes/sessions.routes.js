@@ -1,13 +1,22 @@
 import express from 'express';
 import passport from 'passport';
-import { login } from '../controllers/userController.js';
+import { login, logout } from '../controllers/userController.js';
+import UserDTO from '../dto/userDTO.js';
 
 const router = express.Router();
 
 // Ruta de login
 router.post('/login', login);
 
+// Ruta de logout (requiere autenticación)
+router.post(
+  '/logout',
+  passport.authenticate('current', { session: false }),
+  logout
+);
+
 // Ruta para obtener el usuario actual (requiere autenticación)
+// Modificada para usar DTO y no enviar información sensible
 router.get(
   '/current',
   passport.authenticate('current', { session: false }),
@@ -21,9 +30,12 @@ router.get(
         });
       }
 
+      // Crear DTO para enviar solo información no sensible
+      const userDTO = UserDTO.from(req.user);
+
       res.json({
         status: 'success',
-        user: req.user
+        user: userDTO.toJSON()
       });
     } catch (error) {
       res.status(500).json({

@@ -82,7 +82,7 @@
         <!-- Acciones -->
         <div class="product-actions">
           {{#if product.stock}}
-            <form action="/api/carts/{{cartId}}/products/{{product._id}}" method="post" class="add-to-cart-form">
+            <form class="add-to-cart-form" data-product-id="{{product._id}}" data-cart-id="{{cartId}}">
               <div class="quantity-selector">
                 <label for="quantity">Cantidad:</label>
                 <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{product.stock}}">
@@ -118,6 +118,87 @@
   function changeMainImage(src) {
     document.querySelector('.main-image').src = src;
   }
+
+  // Manejar agregar al carrito con autenticación
+  document.addEventListener('DOMContentLoaded', function() {
+    const addToCartForm = document.querySelector('.add-to-cart-form');
+    
+    if (addToCartForm) {
+      addToCartForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const token = localStorage.getItem('token');
+        const productId = addToCartForm.dataset.productId;
+        const cartId = addToCartForm.dataset.cartId;
+        const quantity = document.getElementById('quantity').value;
+        const submitBtn = addToCartForm.querySelector('button[type="submit"]');
+        
+        // Verificar si el usuario está logueado
+        if (!token) {
+          alert('Debes iniciar sesión para agregar productos al carrito.\n\nSerás redirigido a la página de login.');
+          window.location.href = '/login';
+          return;
+        }
+        
+        // Verificar rol del usuario
+        const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+        if (user && user.role === 'admin') {
+          alert('Los administradores no pueden agregar productos al carrito.');
+          return;
+        }
+        
+        // Guardar estado original del botón
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Agregando...';
+        
+        try {
+          const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ quantity: parseInt(quantity) })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            submitBtn.textContent = '✅ Agregado';
+            submitBtn.style.background = '#28a745';
+            showSuccessMessage('Producto agregado al carrito');
+            
+            // Restaurar botón después de 2 segundos
+            setTimeout(() => {
+              submitBtn.disabled = false;
+              submitBtn.textContent = originalText;
+              submitBtn.style.background = '';
+            }, 2000);
+          } else {
+            if (response.status === 401) {
+              alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              window.location.href = '/login';
+            } else if (response.status === 403) {
+              alert(data.message || 'No tienes permisos para realizar esta acción.');
+            } else {
+              showErrorMessage(data.message || 'Error al agregar producto al carrito');
+            }
+            
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showErrorMessage('Error de conexión. Intenta nuevamente.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+      });
+    }
+  });
 
   async function deleteProductAndRedirect(productId, productTitle) {
     // Confirmar eliminación

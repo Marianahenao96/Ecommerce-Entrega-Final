@@ -4,6 +4,7 @@ API RESTful de ecommerce desarrollada con Node.js, Express y MongoDB. Incluye ge
 
 ## 📋 Características
 
+### Funcionalidades Básicas
 - ✅ **CRUD de Productos**: Gestión completa con paginación y filtros
 - ✅ **CRUD de Carritos**: Gestión de carritos de compras
 - ✅ **CRUD de Usuarios**: Gestión completa de usuarios
@@ -13,12 +14,22 @@ API RESTful de ecommerce desarrollada con Node.js, Express y MongoDB. Incluye ge
 - ✅ **Vistas Web**: Interfaz web con Handlebars (login, registro, perfil)
 - ✅ **API RESTful**: Endpoints completos y documentados
 
+### Nuevas Funcionalidades (Entrega Final)
+- ✅ **Patrón Repository**: Implementación de DAOs y Repositories para separar lógica de acceso a datos
+- ✅ **DTOs (Data Transfer Objects)**: Endpoint `/current` ahora usa DTOs para no exponer información sensible
+- ✅ **Recuperación de Contraseña**: Sistema completo con envío de emails y tokens expirables (1 hora)
+- ✅ **Middleware de Autorización**: Control de acceso basado en roles (admin/usuario)
+- ✅ **Modelo Ticket**: Sistema de compras con verificación de stock y generación de tickets
+- ✅ **Lógica de Compra**: Procesamiento de compras con manejo de productos disponibles/no disponibles
+- ✅ **Arquitectura Profesional**: Separación de responsabilidades con capas bien definidas
+
 ## 🛠️ Tecnologías
 
 - **Node.js** + **Express.js**
 - **MongoDB** + **Mongoose**
 - **Passport.js** + **JWT** (jsonwebtoken, passport-jwt)
 - **bcrypt** (encriptación de contraseñas)
+- **nodemailer** (envío de emails)
 - **Handlebars** (templates)
 - **Bootstrap 5** (UI)
 
@@ -37,12 +48,20 @@ npm install
 
 ### 3. Configurar variables de entorno
 
-Crear archivo `.env` en la raíz del proyecto:
+Crear archivo `.env` en la raíz del proyecto. Ver `ENV_SETUP.md` para la configuración completa.
 
+**Variables mínimas requeridas:**
 ```env
 MONGO_URI=mongodb://localhost:27017/ecommerce
 PORT=8080
 JWT_SECRET=tu_secret_key_super_segura_cambiar_en_produccion
+
+# Opcional: Para recuperación de contraseña
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=tu_email@gmail.com
+SMTP_PASS=tu_contraseña_de_aplicacion
+FRONTEND_URL=http://localhost:8080
 ```
 
 ### 4. Ejecutar el proyecto
@@ -121,9 +140,9 @@ Content-Type: application/json
 }
 ```
 
-#### Obtener usuario actual
+#### Logout
 ```http
-GET /api/sessions/current
+POST /api/sessions/logout
 Authorization: Bearer <token>
 ```
 
@@ -131,26 +150,78 @@ Authorization: Bearer <token>
 ```json
 {
   "status": "success",
+  "message": "Logout exitoso. El token debe ser eliminado del cliente."
+}
+```
+
+#### Obtener usuario actual (con DTO)
+```http
+GET /api/sessions/current
+Authorization: Bearer <token>
+```
+
+**Respuesta:** (Usa DTO - no incluye información sensible como contraseña)
+```json
+{
+  "status": "success",
   "user": {
-    "_id": "...",
+    "id": "...",
     "first_name": "Juan",
     "last_name": "Pérez",
     "email": "juan@example.com",
     "age": 25,
     "role": "user",
-    "cart": "..."
+    "cart": "...",
+    "createdAt": "...",
+    "updatedAt": "..."
   }
 }
 ```
 
+### **Recuperación de Contraseña**
+
+#### Solicitar recuperación de contraseña
+```http
+POST /api/password-reset/request
+Content-Type: application/json
+
+{
+  "email": "juan@example.com"
+}
+```
+
+**Nota:** Por seguridad, siempre devuelve éxito aunque el email no exista.
+
+#### Restablecer contraseña
+```http
+POST /api/password-reset/reset
+Content-Type: application/json
+
+{
+  "token": "token_del_email",
+  "newPassword": "nueva_contraseña_segura"
+}
+```
+
+**Características:**
+- El token expira después de 1 hora
+- No permite usar la misma contraseña anterior
+- Envía email con enlace para restablecer
+
 ### **Productos**
 
+**Rutas públicas (sin autenticación):**
 ```http
 GET    /products/api              # Listar productos (con paginación)
 GET    /products/api/:pid         # Obtener producto por ID
-POST   /products/api              # Crear producto
-PUT    /products/api/:pid          # Actualizar producto
-DELETE /products/api/:pid          # Eliminar producto
+```
+
+**Rutas protegidas (solo admin):**
+```http
+POST   /products                  # Crear producto (requiere admin)
+PUT    /products/:pid             # Actualizar producto (requiere admin)
+DELETE /products/api/:pid         # Eliminar producto (requiere admin)
+DELETE /products/:pid             # Eliminar producto (requiere admin)
 ```
 
 **Parámetros de consulta para listar:**
@@ -159,17 +230,39 @@ DELETE /products/api/:pid          # Eliminar producto
 - `sort`: Ordenamiento (`asc`/`desc`)
 - `query`: Filtro por categoría o `available`
 
+**Autorización:**
+- Solo usuarios con rol `admin` pueden crear, actualizar y eliminar productos
+- Todos pueden ver y listar productos
+
 ### **Carritos**
 
 ```http
 POST   /api/carts                           # Crear carrito
 GET    /api/carts/:cid                      # Obtener carrito
-POST   /api/carts/:cid/products/:pid        # Agregar producto
+POST   /api/carts/:cid/products/:pid        # Agregar producto (solo usuarios)
 PUT    /api/carts/:cid/products/:pid        # Actualizar cantidad
 DELETE /api/carts/:cid/products/:pid         # Eliminar producto
 PUT    /api/carts/:cid                      # Actualizar carrito completo
 DELETE /api/carts/:cid                       # Vaciar carrito
 ```
+
+**Autorización:**
+- Solo usuarios con rol `user` pueden agregar productos al carrito
+- Los administradores no pueden agregar productos al carrito
+
+### **Tickets (Compras)**
+
+```http
+POST   /api/tickets/carts/:cid/purchase     # Procesar compra del carrito (solo usuarios)
+GET    /api/tickets/mytickets               # Obtener mis tickets
+GET    /api/tickets/:tid                    # Obtener ticket por ID
+```
+
+**Características:**
+- Verifica stock antes de procesar la compra
+- Genera tickets con productos disponibles y no disponibles
+- Actualiza el stock de productos comprados
+- Maneja compras parciales (algunos productos sin stock)
 
 ## 🎨 Vistas Web
 
@@ -185,36 +278,59 @@ DELETE /api/carts/:cid                       # Vaciar carrito
 ```
 src/
 ├── controllers/
-│   ├── productController.js    # Lógica de productos
-│   ├── cartController.js       # Lógica de carritos
-│   └── userController.js       # Lógica de usuarios y autenticación
+│   ├── productController.js      # Lógica de productos
+│   ├── cartController.js         # Lógica de carritos
+│   ├── userController.js         # Lógica de usuarios y autenticación
+│   ├── passwordResetController.js # Lógica de recuperación de contraseña
+│   └── ticketController.js       # Lógica de tickets/compras
+├── dao/                           # Data Access Objects (DAO)
+│   ├── userDAO.js
+│   ├── productDAO.js
+│   ├── cartDAO.js
+│   └── ticketDAO.js
+├── repositories/                  # Repositories (lógica de negocio)
+│   ├── userRepository.js
+│   ├── productRepository.js
+│   ├── cartRepository.js
+│   └── ticketRepository.js
+├── services/                      # Servicios de negocio
+│   ├── emailService.js           # Servicio de envío de emails
+│   ├── passwordResetService.js   # Servicio de recuperación
+│   └── purchaseService.js        # Servicio de compras
+├── dto/                           # Data Transfer Objects
+│   └── userDTO.js
+├── middlewares/
+│   └── authorization.js          # Middlewares de autorización
 ├── models/
-│   ├── Product.js              # Modelo de productos
-│   ├── Cart.js                 # Modelo de carritos
-│   └── User.js                 # Modelo de usuarios
+│   ├── Product.js                # Modelo de productos
+│   ├── Cart.js                   # Modelo de carritos
+│   ├── User.js                   # Modelo de usuarios
+│   └── Ticket.js                 # Modelo de tickets
 ├── routes/
-│   ├── products.routes.js      # Rutas de productos
-│   ├── carts.routes.js         # Rutas de carritos
-│   ├── users.routes.js         # Rutas CRUD de usuarios
-│   ├── sessions.routes.js      # Rutas de autenticación
-│   └── views.routes.js         # Rutas de vistas web
+│   ├── products.routes.js        # Rutas de productos
+│   ├── carts.routes.js           # Rutas de carritos
+│   ├── users.routes.js           # Rutas CRUD de usuarios
+│   ├── sessions.routes.js        # Rutas de autenticación
+│   ├── passwordReset.routes.js   # Rutas de recuperación
+│   ├── tickets.routes.js         # Rutas de tickets
+│   └── views.routes.js           # Rutas de vistas web
 ├── views/
 │   ├── layouts/
-│   │   └── main.handlebars     # Layout principal
-│   ├── products.handlebars     # Vista de productos
+│   │   └── main.handlebars       # Layout principal
+│   ├── products.handlebars       # Vista de productos
 │   ├── productDetail.handlebars
 │   ├── cart.handlebars
-│   ├── register.handlebars     # Vista de registro
-│   ├── login.handlebars        # Vista de login
-│   └── profile.handlebars      # Vista de perfil
+│   ├── register.handlebars       # Vista de registro
+│   ├── login.handlebars          # Vista de login
+│   └── profile.handlebars        # Vista de perfil
 ├── config/
-│   ├── db.js                   # Configuración de BD
-│   └── passport.config.js      # Configuración de Passport
+│   ├── db.js                     # Configuración de BD
+│   └── passport.config.js        # Configuración de Passport
 ├── public/
 │   └── css/
 │       └── styles.css
-├── app.js                      # Configuración de Express
-└── server.js                   # Servidor principal
+├── app.js                        # Configuración de Express
+└── server.js                     # Servidor principal
 ```
 
 ## 🔐 Sistema de Autenticación
@@ -264,13 +380,31 @@ npm start        # Producción
 npm run seed     # Cargar datos de ejemplo
 ```
 
-## 🔒 Seguridad
+## 🔒 Seguridad y Autorización
 
 - Contraseñas encriptadas con bcrypt.hashSync
 - Tokens JWT con expiración de 24 horas
 - Validación de tokens en rutas protegidas
 - Estrategias de Passport para autenticación
 - Manejo seguro de errores de autenticación
+- **Middleware de autorización por roles:**
+  - `isAdmin`: Solo administradores
+  - `isUser`: Solo usuarios regulares (no admin)
+  - Control de acceso granular a endpoints
+- **DTOs**: Protección de información sensible en respuestas
+- **Tokens de recuperación**: Expiran después de 1 hora
+- **Validación de contraseñas**: No permite reutilizar contraseñas anteriores
+
+## 🏗️ Arquitectura
+
+El proyecto implementa una arquitectura profesional con:
+
+- **Patrón Repository**: Separa la lógica de acceso a datos de la lógica de negocio
+- **DAOs (Data Access Objects)**: Abstracción de las operaciones de base de datos
+- **DTOs (Data Transfer Objects)**: Transferencia segura de datos entre capas
+- **Servicios**: Lógica de negocio reutilizable
+- **Middlewares**: Autorización y validación centralizadas
+- **Separación de responsabilidades**: Cada capa tiene su función específica
 
 ## 📄 Licencia
 

@@ -1,5 +1,4 @@
-import UserModel from '../models/User.js';
-import CartModel from '../models/Cart.js';
+import userRepository from '../repositories/userRepository.js';
 import { generateToken } from '../config/passport.config.js';
 
 // CRUD de Usuarios
@@ -18,7 +17,7 @@ export const createUser = async (req, res) => {
     }
 
     // Verificar si el usuario ya existe
-    const existingUser = await UserModel.findOne({ email });
+    const existingUser = await userRepository.getUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({
         status: 'error',
@@ -26,22 +25,18 @@ export const createUser = async (req, res) => {
       });
     }
 
-    // Crear carrito para el usuario
-    const newCart = await CartModel.create({ products: [] });
-
-    // Crear usuario (la contraseña se encriptará automáticamente en el pre-save hook)
-    const newUser = await UserModel.create({
+    // Crear usuario (el repository se encarga de crear el carrito)
+    const newUser = await userRepository.createUser({
       first_name,
       last_name,
       email,
       age,
-      password, // Se encriptará automáticamente
-      cart: newCart._id,
+      password,
       role: role || 'user'
     });
 
     // Obtener usuario sin la contraseña
-    const userResponse = await UserModel.findById(newUser._id).select('-password').populate('cart');
+    const userResponse = await userRepository.getUserById(newUser._id);
 
     res.status(201).json({
       status: 'success',
@@ -60,7 +55,7 @@ export const createUser = async (req, res) => {
 // Obtener todos los usuarios
 export const getUsers = async (req, res) => {
   try {
-    const users = await UserModel.find().select('-password').populate('cart');
+    const users = await userRepository.getAllUsers();
     
     res.json({
       status: 'success',
@@ -80,7 +75,7 @@ export const getUserById = async (req, res) => {
   try {
     const { uid } = req.params;
     
-    const user = await UserModel.findById(uid).select('-password').populate('cart');
+    const user = await userRepository.getUserById(uid);
     
     if (!user) {
       return res.status(404).json({
@@ -115,11 +110,7 @@ export const updateUser = async (req, res) => {
     if (age !== undefined) updateData.age = age;
     if (role) updateData.role = role;
 
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      uid,
-      updateData,
-      { new: true, runValidators: true }
-    ).select('-password').populate('cart');
+    const updatedUser = await userRepository.updateUser(uid, updateData);
 
     if (!updatedUser) {
       return res.status(404).json({
@@ -147,18 +138,13 @@ export const deleteUser = async (req, res) => {
   try {
     const { uid } = req.params;
 
-    const deletedUser = await UserModel.findByIdAndDelete(uid);
+    const deletedUser = await userRepository.deleteUser(uid);
 
     if (!deletedUser) {
       return res.status(404).json({
         status: 'error',
         message: 'Usuario no encontrado'
       });
-    }
-
-    // Opcional: eliminar el carrito asociado
-    if (deletedUser.cart) {
-      await CartModel.findByIdAndDelete(deletedUser.cart);
     }
 
     res.json({
@@ -187,8 +173,8 @@ export const login = async (req, res) => {
       });
     }
 
-    // Buscar usuario por email
-    const user = await UserModel.findOne({ email });
+    // Buscar usuario por email (con contraseña para validar)
+    const user = await userRepository.getUserByEmailWithPassword(email);
 
     if (!user) {
       return res.status(401).json({
@@ -198,7 +184,7 @@ export const login = async (req, res) => {
     }
 
     // Verificar contraseña
-    const isPasswordValid = await user.comparePassword(password);
+    const isPasswordValid = await userRepository.comparePassword(user, password);
 
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -211,7 +197,7 @@ export const login = async (req, res) => {
     const token = generateToken(user._id);
 
     // Obtener usuario sin la contraseña
-    const userResponse = await UserModel.findById(user._id).select('-password').populate('cart');
+    const userResponse = await userRepository.getUserById(user._id);
 
     res.json({
       status: 'success',
@@ -223,6 +209,28 @@ export const login = async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Error en el login',
+      error: error.message
+    });
+  }
+};
+
+// Logout de usuario
+export const logout = async (req, res) => {
+  try {
+    // En un sistema JWT sin sesiones del servidor, el logout se maneja en el cliente
+    // eliminando el token. Sin embargo, podemos invalidar el token o simplemente
+    // confirmar el logout exitoso.
+    
+    // Opcional: Si tienes una lista negra de tokens (blacklist), agregar el token aquí
+    
+    res.json({
+      status: 'success',
+      message: 'Logout exitoso. El token debe ser eliminado del cliente.'
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Error en el logout',
       error: error.message
     });
   }
