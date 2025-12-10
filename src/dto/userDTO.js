@@ -6,7 +6,14 @@ class UserDTO {
     this.email = user.email;
     this.age = user.age;
     this.role = user.role;
-    this.cart = user.cart;
+    // Manejar carrito: puede ser ObjectId, objeto populado, o null
+    if (user.cart) {
+      this.cart = typeof user.cart === 'object' && user.cart._id 
+        ? user.cart._id.toString() 
+        : user.cart.toString ? user.cart.toString() : user.cart;
+    } else {
+      this.cart = null;
+    }
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
   }
@@ -26,7 +33,7 @@ class UserDTO {
       email: this.email,
       age: this.age,
       role: this.role,
-      cart: this.cart,
+      cart: this.cart ? (typeof this.cart === 'object' && this.cart._id ? this.cart._id.toString() : this.cart.toString()) : null,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };

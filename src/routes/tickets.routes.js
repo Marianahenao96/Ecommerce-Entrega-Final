@@ -1,16 +1,16 @@
 import express from 'express';
-import passport from 'passport';
 import {
   processPurchase,
   getUserTickets,
   getTicketById
 } from '../controllers/ticketController.js';
 import { isUser, isAdmin } from '../middlewares/authorization.js';
+import { authenticateJWT } from '../middlewares/auth.js';
 
 const router = express.Router();
 
 // Todas las rutas requieren autenticación
-router.use(passport.authenticate('current', { session: false }));
+router.use(authenticateJWT);
 
 // Procesar compra del carrito (solo usuarios)
 router.post('/carts/:cid/purchase', isUser, processPurchase);

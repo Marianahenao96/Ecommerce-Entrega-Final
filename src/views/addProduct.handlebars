@@ -1,6 +1,6 @@
 <div class="container">
   <div class="form-header">
-    <h1>➕ Agregar Nuevo Producto</h1>
+    <h1> Agregar Nuevo Producto</h1>
     <a href="/products" class="btn btn-outline">
       ← Volver a productos
     </a>
@@ -9,7 +9,7 @@
   <div class="form-container">
     <form action="/products" method="post" class="product-form" id="productForm">
       <div class="form-section">
-        <h3>📝 Información Básica</h3>
+        <h3>Información Básica</h3>
         
         <div class="form-group">
           <label for="title" class="form-label">Título del Producto *</label>
@@ -56,7 +56,7 @@
       </div>
 
       <div class="form-section">
-        <h3>💰 Precio y Stock</h3>
+        <h3> Precio y Stock</h3>
         
         <div class="form-row">
           <div class="form-group">
@@ -92,7 +92,7 @@
       </div>
 
       <div class="form-section">
-        <h3>🏷️ Categorización</h3>
+        <h3> Categorización</h3>
         
         <div class="form-group">
           <label for="category" class="form-label">Categoría *</label>
@@ -123,7 +123,7 @@
       </div>
 
       <div class="form-section">
-        <h3>🖼️ Imágenes</h3>
+        <h3> Imágenes</h3>
         
         <div class="form-group">
           <label for="thumbnails" class="form-label">URLs de Imágenes</label>
@@ -145,10 +145,10 @@
 
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" onclick="resetForm()">
-          🔄 Limpiar formulario
+           Limpiar formulario
         </button>
         <button type="submit" class="btn btn-primary">
-          ✅ Crear Producto
+           Crear Producto
         </button>
       </div>
     </form>
@@ -156,8 +156,29 @@
 </div>
 
 <script>
-  // Validación en tiempo real
-  document.getElementById('productForm').addEventListener('submit', function(e) {
+  // Manejar envío del formulario con AJAX y autenticación
+  document.getElementById('productForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const token = localStorage.getItem('token');
+    
+    // Verificar autenticación
+    if (!token) {
+      alert('Debes iniciar sesión como administrador para agregar productos.\n\nSerás redirigido a la página de login.');
+      window.location.href = '/login';
+      return;
+    }
+    
+    // Verificar rol
+    const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+    if (!user || user.role !== 'admin') {
+      alert('Solo los administradores pueden agregar productos.');
+      return;
+    }
+    
+    // Validación de campos
     const title = document.getElementById('title').value.trim();
     const description = document.getElementById('description').value.trim();
     const code = document.getElementById('code').value.trim();
@@ -166,21 +187,79 @@
     const category = document.getElementById('category').value;
 
     if (!title || !description || !code || !price || !stock || !category) {
-      e.preventDefault();
       alert('Por favor, completa todos los campos obligatorios.');
       return;
     }
 
     if (price < 0) {
-      e.preventDefault();
       alert('El precio no puede ser negativo.');
       return;
     }
 
     if (stock < 0) {
-      e.preventDefault();
       alert('El stock no puede ser negativo.');
       return;
+    }
+    
+    // Preparar datos
+    const formData = {
+      title,
+      description,
+      code,
+      price,
+      stock,
+      category,
+      thumbnails: document.getElementById('thumbnails').value.trim(),
+      status: document.querySelector('input[name="status"]').checked
+    };
+    
+    // Deshabilitar botón
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = '⏳ Creando...';
+    
+    try {
+      const response = await fetch('/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      let data;
+      try {
+        const text = await response.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (parseError) {
+        console.error('Error parseando respuesta:', parseError);
+        data = { message: 'Error en la respuesta del servidor' };
+      }
+      
+      if (response.ok) {
+        alert('✅ Producto creado exitosamente');
+        window.location.href = '/products';
+      } else {
+        if (response.status === 401) {
+          alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        } else if (response.status === 403) {
+          alert(data.message || 'Solo los administradores pueden agregar productos.');
+        } else {
+          alert(data.message || 'Error al crear el producto: ' + response.statusText);
+        }
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error de conexión. Intenta nuevamente.');
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
     }
   });
 

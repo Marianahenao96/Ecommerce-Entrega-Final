@@ -181,7 +181,10 @@ export const createProduct = async (req, res) => {
 
     console.log('✅ Producto creado:', product);
 
-    if (req.path.startsWith('/api/')) {
+    // Detectar si es una petición AJAX o API
+    if (req.path.startsWith('/api/') || 
+        (req.headers.accept && req.headers.accept.includes('application/json')) ||
+        req.headers['x-requested-with'] === 'XMLHttpRequest') {
       return res.status(201).json({ 
         status: 'success', 
         message: 'Producto creado exitosamente',
@@ -193,8 +196,13 @@ export const createProduct = async (req, res) => {
   } catch (error) {
     console.error('❌ Error al crear producto:', error);
     
+    // Detectar si es una petición AJAX o API
+    const isAjax = req.path.startsWith('/api/') || 
+                   (req.headers.accept && req.headers.accept.includes('application/json')) ||
+                   req.headers['x-requested-with'] === 'XMLHttpRequest';
+    
     if (error.message.includes('Ya existe un producto con este código')) {
-      if (req.path.startsWith('/api/')) {
+      if (isAjax) {
         return res.status(400).json({ 
           status: 'error', 
           message: error.message
@@ -203,10 +211,11 @@ export const createProduct = async (req, res) => {
       return res.status(400).send(error.message);
     }
     
-    if (req.path.startsWith('/api/')) {
+    if (isAjax) {
       return res.status(500).json({ 
         status: 'error', 
-        message: 'Error interno del servidor al crear producto' 
+        message: 'Error interno del servidor al crear producto',
+        error: error.message
       });
     }
     

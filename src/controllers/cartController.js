@@ -72,10 +72,12 @@ export const addProductToCart = async (req, res) => {
       const cart = await cartRepository.addProductToCart(cid, pid, quantity);
       console.log(`✅ Producto ${pid} agregado al carrito ${cid}`);
       
-      // Si es una petición AJAX (con header Accept: application/json o X-Requested-With)
-      if (req.headers.accept && req.headers.accept.includes('application/json') || 
-          req.headers['x-requested-with'] === 'XMLHttpRequest' ||
-          req.path.startsWith('/api/')) {
+      // Siempre devolver JSON para peticiones AJAX/API
+      const isAjax = req.headers.accept && req.headers.accept.includes('application/json') || 
+                     req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+                     req.path.startsWith('/api/');
+      
+      if (isAjax) {
         return res.json({
           status: 'success',
           message: 'Producto agregado al carrito exitosamente',
@@ -84,12 +86,14 @@ export const addProductToCart = async (req, res) => {
       }
       
       // Si no, hacer redirect (para compatibilidad con formularios HTML tradicionales)
-      res.redirect('/api/products');
+      res.redirect('/products');
     } catch (error) {
+      const isAjax = req.headers.accept && req.headers.accept.includes('application/json') ||
+                     req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+                     req.path.startsWith('/api/');
+      
       if (error.message.includes('no encontrado')) {
-        if (req.headers.accept && req.headers.accept.includes('application/json') ||
-            req.headers['x-requested-with'] === 'XMLHttpRequest' ||
-            req.path.startsWith('/api/')) {
+        if (isAjax) {
           return res.status(404).json({
             status: 'error',
             message: error.message
@@ -102,9 +106,11 @@ export const addProductToCart = async (req, res) => {
   } catch (error) {
     console.error('❌ Error al agregar producto al carrito:', error);
     
-    if (req.headers.accept && req.headers.accept.includes('application/json') ||
-        req.headers['x-requested-with'] === 'XMLHttpRequest' ||
-        req.path.startsWith('/api/')) {
+    const isAjax = req.headers.accept && req.headers.accept.includes('application/json') ||
+                   req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+                   req.path.startsWith('/api/');
+    
+    if (isAjax) {
       return res.status(500).json({
         status: 'error',
         message: 'Error al agregar producto al carrito',

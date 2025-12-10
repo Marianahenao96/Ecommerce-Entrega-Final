@@ -72,11 +72,9 @@
         <div class="product-actions">
           <a href="/products/{{this._id}}" class="btn btn-primary">👁️ Ver detalles</a>
           
-          {{#if cartId}}
-            <form class="add-to-cart-form" data-product-id="{{this._id}}" data-cart-id="{{cartId}}">
-              <button type="submit" class="btn btn-success">🛒 Agregar al carrito</button>
-            </form>
-          {{/if}}
+          <form class="add-to-cart-form" data-product-id="{{this._id}}" data-cart-id="{{cartId}}">
+            <button type="submit" class="btn btn-success">🛒 Agregar al carrito</button>
+          </form>
 
           <button 
             type="button" 
@@ -407,7 +405,6 @@
         
         const token = localStorage.getItem('token');
         const productId = form.dataset.productId;
-        const cartId = form.dataset.cartId;
         const submitBtn = form.querySelector('button[type="submit"]');
         
         // Verificar si el usuario está logueado
@@ -419,8 +416,24 @@
         
         // Verificar rol del usuario
         const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
-        if (user && user.role === 'admin') {
-          alert('Los administradores no pueden agregar productos al carrito.');
+        if (!user || user.role !== 'user') {
+          if (user && user.role === 'admin') {
+            alert('Los administradores no pueden agregar productos al carrito.');
+          } else {
+            alert('Solo los usuarios regulares pueden agregar productos al carrito.');
+          }
+          return;
+        }
+        
+        // Obtener el carrito del usuario
+        let cartId = form.dataset.cartId;
+        if (user && user.cart) {
+          // Usar el carrito del usuario si está disponible
+          cartId = typeof user.cart === 'object' ? user.cart._id || user.cart : user.cart;
+        }
+        
+        if (!cartId) {
+          alert('No se pudo obtener el carrito. Por favor, recarga la página.');
           return;
         }
         

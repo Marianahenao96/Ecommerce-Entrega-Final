@@ -34,22 +34,71 @@
     (function() {
       const userNav = document.getElementById('userNav');
       const token = localStorage.getItem('token');
-      const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+      let user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
 
-      if (token && user) {
-        // Usuario logueado
-        userNav.innerHTML = `
-          <a class="btn btn-outline-info" href="/profile">👤 ${user.first_name}</a>
-          <a class="btn btn-outline-warning" href="/carts/${user.cart ? (typeof user.cart === 'object' ? user.cart._id : user.cart) : ''}" id="cartNavBtn">🛒</a>
-          <button class="btn btn-outline-danger" onclick="localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='/login';">Salir</button>
-        `;
-      } else {
-        // Usuario no logueado
-        userNav.innerHTML = `
-          <a class="btn btn-outline-light" href="/login">Iniciar Sesión</a>
-          <a class="btn btn-outline-success" href="/register">Registrarse</a>
-        `;
+      // Si hay token pero no hay usuario, intentar obtenerlo del servidor
+      if (token && !user) {
+        fetch('/api/sessions/current', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(res => {
+          // Validar el status HTTP antes de parsear JSON
+          if (!res.ok) {
+            // Si es 401 (no autorizado), el token es inválido o expirado
+            if (res.status === 401) {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              updateNav();
+              return null;
+            }
+            // Para otros errores HTTP, lanzar error para que lo capture el catch
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          // Solo procesar si data existe (no fue null por error 401)
+          if (data && data.status === 'success' && data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            user = data.user;
+            updateNav();
+          }
+        })
+        .catch(err => {
+          // Solo loguear el error, no eliminar el token automáticamente
+          // El token solo se elimina si la respuesta fue 401 (manejado arriba)
+          // Esto evita logout agresivo por errores de red temporales
+          console.error('Error obteniendo usuario:', err);
+          // No hacer nada más aquí, mantener el estado actual
+        });
       }
+
+      function updateNav() {
+        if (token && user) {
+          // Obtener ID del carrito
+          let cartId = '';
+          if (user.cart) {
+            cartId = typeof user.cart === 'object' ? (user.cart._id || user.cart) : user.cart;
+          }
+          
+          // Usuario logueado
+          userNav.innerHTML = `
+            <a class="btn btn-outline-info" href="/profile">👤 ${user.first_name}</a>
+            ${cartId ? `<a class="btn btn-outline-warning" href="/carts/${cartId}" id="cartNavBtn">🛒</a>` : ''}
+            <button class="btn btn-outline-danger" onclick="localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='/login';">Salir</button>
+          `;
+        } else {
+          // Usuario no logueado
+          userNav.innerHTML = `
+            <a class="btn btn-outline-light" href="/login">Iniciar Sesión</a>
+            <a class="btn btn-outline-success" href="/register">Registrarse</a>
+          `;
+        }
+      }
+
+      updateNav();
     })();
   </script>
 </body>

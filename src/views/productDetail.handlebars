@@ -129,7 +129,6 @@
         
         const token = localStorage.getItem('token');
         const productId = addToCartForm.dataset.productId;
-        const cartId = addToCartForm.dataset.cartId;
         const quantity = document.getElementById('quantity').value;
         const submitBtn = addToCartForm.querySelector('button[type="submit"]');
         
@@ -142,8 +141,24 @@
         
         // Verificar rol del usuario
         const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
-        if (user && user.role === 'admin') {
-          alert('Los administradores no pueden agregar productos al carrito.');
+        if (!user || user.role !== 'user') {
+          if (user && user.role === 'admin') {
+            alert('Los administradores no pueden agregar productos al carrito.');
+          } else {
+            alert('Solo los usuarios regulares pueden agregar productos al carrito.');
+          }
+          return;
+        }
+        
+        // Obtener el carrito del usuario
+        let cartId = addToCartForm.dataset.cartId;
+        if (user && user.cart) {
+          // Usar el carrito del usuario si está disponible
+          cartId = typeof user.cart === 'object' ? user.cart._id || user.cart : user.cart;
+        }
+        
+        if (!cartId) {
+          alert('No se pudo obtener el carrito. Por favor, recarga la página.');
           return;
         }
         
@@ -153,16 +168,35 @@
         submitBtn.textContent = '⏳ Agregando...';
         
         try {
+          console.log('Enviando petición:', {
+            url: `/api/carts/${cartId}/products/${productId}`,
+            token: token ? 'Token presente' : 'Token ausente',
+            cartId,
+            productId,
+            quantity
+          });
+          
           const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Accept': 'application/json',
               'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ quantity: parseInt(quantity) })
           });
           
-          const data = await response.json();
+          console.log('Respuesta recibida:', response.status, response.statusText);
+          
+          let data;
+          try {
+            const text = await response.text();
+            console.log('Respuesta texto:', text);
+            data = text ? JSON.parse(text) : {};
+          } catch (parseError) {
+            console.error('Error parseando JSON:', parseError);
+            data = { message: 'Error en la respuesta del servidor' };
+          }
           
           if (response.ok) {
             submitBtn.textContent = '✅ Agregado';
@@ -176,23 +210,28 @@
               submitBtn.style.background = '';
             }, 2000);
           } else {
+            console.error('Error en respuesta:', response.status, data);
+            
             if (response.status === 401) {
-              alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+              const message = data.message || 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+              alert(message);
               localStorage.removeItem('token');
               localStorage.removeItem('user');
               window.location.href = '/login';
             } else if (response.status === 403) {
-              alert(data.message || 'No tienes permisos para realizar esta acción.');
+              alert(data.message || 'No tienes permisos para realizar esta acción. Solo los usuarios pueden agregar productos al carrito.');
             } else {
-              showErrorMessage(data.message || 'Error al agregar producto al carrito');
+              const errorMsg = data.message || data.error || `Error ${response.status}: ${response.statusText}`;
+              showErrorMessage(errorMsg);
+              console.error('Error completo:', errorMsg);
             }
             
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
           }
         } catch (error) {
-          console.error('Error:', error);
-          showErrorMessage('Error de conexión. Intenta nuevamente.');
+          console.error('Error de conexión:', error);
+          showErrorMessage('Error de conexión: ' + error.message);
           submitBtn.disabled = false;
           submitBtn.textContent = originalText;
         }

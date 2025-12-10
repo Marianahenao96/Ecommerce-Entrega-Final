@@ -4,16 +4,17 @@ import CartModel from '../models/Cart.js';
 
 const router = Router();
 
-// 🔹 Redirección principal
+//  Redirección principal
 router.get('/', (req, res) => res.redirect('/products'));
 
-// 📦 Listar productos (con paginación, filtros y orden)
+//  Listar productos (con paginación, filtros y orden)
 router.get('/products', async (req, res) => {
   try {
     const { limit = 10, page = 1, sort, query } = req.query;
 
-    // ✅ Buscar o crear un carrito (si no existe)
-    let cart = await CartModel.findOne();
+    // Buscar o crear un carrito genérico para usuarios no logueados
+    // Los usuarios logueados usarán su propio carrito
+    let cart = await CartModel.findOne().sort({ createdAt: -1 });
     if (!cart) {
       cart = await CartModel.create({ products: [] });
       console.log('🛒 Nuevo carrito creado con ID:', cart._id);
@@ -71,19 +72,19 @@ router.get('/products', async (req, res) => {
       query,
     });
   } catch (error) {
-    console.error('❌ Error al obtener productos:', error);
+    console.error(' Error al obtener productos:', error);
     res.status(500).send('Error interno del servidor');
   }
 });
 
-// 🧾 Detalle de producto
+//  Detalle de producto
 router.get('/products/:pid', async (req, res) => {
   try {
     const product = await ProductModel.findById(req.params.pid).lean();
 
     if (!product) return res.status(404).send('Producto no encontrado');
 
-    // ✅ Buscar o crear un carrito (si no existe)
+    //  Buscar o crear un carrito (si no existe)
     let cart = await CartModel.findOne();
     if (!cart) {
       cart = await CartModel.create({ products: [] });
@@ -96,12 +97,12 @@ router.get('/products/:pid', async (req, res) => {
       cartId: cart._id.toString(),
     });
   } catch (error) {
-    console.error('❌ Error al obtener el producto:', error);
+    console.error(' Error al obtener el producto:', error);
     res.status(500).send('Error interno del servidor');
   }
 });
 
-// 🛒 Vista del carrito
+// Vista del carrito
 router.get('/carts/:cid', async (req, res) => {
   try {
     const cart = await CartModel.findById(req.params.cid)
@@ -115,17 +116,17 @@ router.get('/carts/:cid', async (req, res) => {
       cart,
     });
   } catch (error) {
-    console.error('❌ Error al obtener el carrito:', error);
+    console.error(' Error al obtener el carrito:', error);
     res.status(500).send('Error interno del servidor');
   }
 });
 
-// 🧩 Formulario para agregar productos (solo vista)
+//  Formulario para agregar productos (solo vista)
 router.get('/add-product', (req, res) => {
   res.render('addProduct', { title: 'Agregar Producto' });
 });
 
-// 👤 Vistas de autenticación
+//  Vistas de autenticación
 router.get('/register', (req, res) => {
   res.render('register', { title: 'Registro' });
 });

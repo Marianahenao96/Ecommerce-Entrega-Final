@@ -2,6 +2,7 @@ import { Router } from 'express';
 import passport from 'passport';
 import * as ctrl from '../controllers/productController.js';
 import { isAdmin } from '../middlewares/authorization.js';
+import { authenticateJWT } from '../middlewares/auth.js';
 
 const router = Router();
 
@@ -14,37 +15,34 @@ router.get('/', ctrl.getProducts);
 router.get('/:pid', ctrl.getProductById);
 
 // ✅ Mostrar formulario para agregar producto (requiere admin)
-router.get('/view/add', 
-  passport.authenticate('current', { session: false }),
-  isAdmin,
-  (req, res) => {
-    res.render('addProduct', { title: 'Agregar nuevo producto' });
-  }
-);
+// Para la vista, permitimos acceso pero el formulario validará con token
+router.get('/view/add', (req, res) => {
+  res.render('addProduct', { title: 'Agregar nuevo producto' });
+});
 
 // ✅ CRUD Operations - Solo admin puede crear, actualizar y eliminar
 router.post('/', 
-  passport.authenticate('current', { session: false }),
+  authenticateJWT,
   isAdmin,
   ctrl.createProduct
 );
 router.put('/:pid', 
-  passport.authenticate('current', { session: false }),
+  authenticateJWT,
   isAdmin,
   ctrl.updateProduct
 );
 router.delete('/api/:pid', 
-  passport.authenticate('current', { session: false }),
+  authenticateJWT,
   isAdmin,
   ctrl.deleteProduct
 );
 router.delete('/:pid', 
-  passport.authenticate('current', { session: false }),
+  authenticateJWT,
   isAdmin,
   ctrl.deleteProduct
 );
 router.post('/:pid/decrease', 
-  passport.authenticate('current', { session: false }),
+  authenticateJWT,
   isAdmin,
   ctrl.decreaseStock
 );

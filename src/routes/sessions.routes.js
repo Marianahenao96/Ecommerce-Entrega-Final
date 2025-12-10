@@ -1,7 +1,7 @@
 import express from 'express';
-import passport from 'passport';
 import { login, logout } from '../controllers/userController.js';
 import UserDTO from '../dto/userDTO.js';
+import { authenticateJWT } from '../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ router.post('/login', login);
 // Ruta de logout (requiere autenticación)
 router.post(
   '/logout',
-  passport.authenticate('current', { session: false }),
+  authenticateJWT,
   logout
 );
 
@@ -19,10 +19,10 @@ router.post(
 // Modificada para usar DTO y no enviar información sensible
 router.get(
   '/current',
-  passport.authenticate('current', { session: false }),
+  authenticateJWT,
   (req, res) => {
     try {
-      // El usuario está disponible en req.user gracias a la estrategia 'current'
+      // El usuario está disponible en req.user gracias al middleware authenticateJWT
       if (!req.user) {
         return res.status(401).json({
           status: 'error',
