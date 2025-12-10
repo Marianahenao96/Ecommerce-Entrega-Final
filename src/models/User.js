@@ -38,6 +38,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['user', 'admin'],
     default: 'user'
+  },
+  pets: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Pet',
+    default: []
   }
 }, {
   timestamps: true

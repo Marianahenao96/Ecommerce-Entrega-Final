@@ -19,7 +19,7 @@ class EmailService {
       });
     } else {
       // Modo desarrollo: usar transporte de prueba (solo para desarrollo)
-      console.warn('⚠️ SMTP no configurado. Usando transporte de prueba. Los emails no se enviarán realmente.');
+      console.warn('SMTP no configurado. Usando transporte de prueba. Los emails no se enviarán realmente.');
       this.transporter = nodemailer.createTransport({
         host: 'smtp.ethereal.email',
         port: 587,
@@ -35,10 +35,10 @@ class EmailService {
   async verifyConnection() {
     try {
       await this.transporter.verify();
-      console.log('✅ Servidor de email listo para enviar mensajes');
+      console.log('Servidor de email listo para enviar mensajes');
       return true;
     } catch (error) {
-      console.error('❌ Error verificando servidor de email:', error);
+      console.error('Error verificando servidor de email:', error);
       return false;
     }
   }
@@ -106,7 +106,7 @@ class EmailService {
               <a href="${resetUrl}" class="button">Restablecer contraseña</a>
             </div>
             <div class="warning">
-              <strong>⚠️ Importante:</strong> Este enlace expirará en 1 hora por seguridad.
+              <strong>Importante:</strong> Este enlace expirará en 1 hora por seguridad.
             </div>
             <p>Si no solicitaste este cambio, puedes ignorar este email.</p>
             <p>Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</p>
@@ -122,10 +122,10 @@ class EmailService {
 
     try {
       const info = await this.transporter.sendMail(mailOptions);
-      console.log('✅ Email de recuperación enviado:', info.messageId);
+      console.log('Email de recuperación enviado:', info.messageId);
       return { success: true, messageId: info.messageId };
     } catch (error) {
-      console.error('❌ Error enviando email:', error);
+      console.error('Error enviando email:', error);
       throw new Error('Error al enviar el email de recuperación');
     }
   }

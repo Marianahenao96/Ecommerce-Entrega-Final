@@ -1,29 +1,30 @@
-# 🛒 Ecommerce API - Backend con Autenticación
+# Ecommerce API - Backend con Autenticación
 
 API RESTful de ecommerce desarrollada con Node.js, Express y MongoDB. Incluye gestión de productos, carritos de compras, sistema completo de autenticación y autorización con JWT, y vistas web responsivas.
 
-## 📋 Características
+## Características
 
 ### Funcionalidades Básicas
-- ✅ **CRUD de Productos**: Gestión completa con paginación y filtros
-- ✅ **CRUD de Carritos**: Gestión de carritos de compras
-- ✅ **CRUD de Usuarios**: Gestión completa de usuarios
-- ✅ **Autenticación JWT**: Sistema de login con tokens JWT
-- ✅ **Encriptación de Contraseñas**: Usando bcrypt.hashSync
-- ✅ **Estrategias Passport**: Autenticación y autorización con Passport.js
-- ✅ **Vistas Web**: Interfaz web con Handlebars (login, registro, perfil)
-- ✅ **API RESTful**: Endpoints completos y documentados
+- **CRUD de Productos**: Gestión completa con paginación y filtros
+- **CRUD de Carritos**: Gestión de carritos de compras
+- **CRUD de Usuarios**: Gestión completa de usuarios
+- **Autenticación JWT**: Sistema de login con tokens JWT
+- **Encriptación de Contraseñas**: Usando bcrypt
+- **Estrategias Passport**: Autenticación y autorización con Passport.js
+- **Vistas Web**: Interfaz web con Handlebars (login, registro, perfil)
+- **API RESTful**: Endpoints completos y documentados
 
-### Nuevas Funcionalidades (Entrega Final)
-- ✅ **Patrón Repository**: Implementación de DAOs y Repositories para separar lógica de acceso a datos
-- ✅ **DTOs (Data Transfer Objects)**: Endpoint `/current` ahora usa DTOs para no exponer información sensible
-- ✅ **Recuperación de Contraseña**: Sistema completo con envío de emails y tokens expirables (1 hora)
-- ✅ **Middleware de Autorización**: Control de acceso basado en roles (admin/usuario)
-- ✅ **Modelo Ticket**: Sistema de compras con verificación de stock y generación de tickets
-- ✅ **Lógica de Compra**: Procesamiento de compras con manejo de productos disponibles/no disponibles
-- ✅ **Arquitectura Profesional**: Separación de responsabilidades con capas bien definidas
+### Funcionalidades Avanzadas
+- **Patrón Repository**: Implementación de DAOs y Repositories para separar lógica de acceso a datos
+- **DTOs (Data Transfer Objects)**: Endpoint `/current` usa DTOs para no exponer información sensible
+- **Recuperación de Contraseña**: Sistema completo con envío de emails y tokens expirables (1 hora)
+- **Middleware de Autorización**: Control de acceso basado en roles (admin/usuario)
+- **Modelo Ticket**: Sistema de compras con verificación de stock y generación de tickets
+- **Lógica de Compra**: Procesamiento de compras con manejo de productos disponibles/no disponibles
+- **Arquitectura Profesional**: Separación de responsabilidades con capas bien definidas
+- **Sistema de Mocking**: Generación de datos de prueba para desarrollo y testing
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 - **Node.js** + **Express.js**
 - **MongoDB** + **Mongoose**
@@ -32,8 +33,9 @@ API RESTful de ecommerce desarrollada con Node.js, Express y MongoDB. Incluye ge
 - **nodemailer** (envío de emails)
 - **Handlebars** (templates)
 - **Bootstrap 5** (UI)
+- **@faker-js/faker** (generación de datos mock)
 
-## 🚀 Instalación
+## Instalación
 
 ### 1. Clonar el repositorio
 ```bash
@@ -76,9 +78,9 @@ npm start
 
 El servidor estará disponible en `http://localhost:8080`
 
-## 📡 Endpoints de la API
+## Endpoints de la API
 
-### **Usuarios**
+### Usuarios
 
 #### Crear usuario
 ```http
@@ -117,7 +119,7 @@ Content-Type: application/json
 DELETE /api/users/:uid
 ```
 
-### **Sesiones (Autenticación)**
+### Sesiones (Autenticación)
 
 #### Login
 ```http
@@ -146,14 +148,6 @@ POST /api/sessions/logout
 Authorization: Bearer <token>
 ```
 
-**Respuesta:**
-```json
-{
-  "status": "success",
-  "message": "Logout exitoso. El token debe ser eliminado del cliente."
-}
-```
-
 #### Obtener usuario actual (con DTO)
 ```http
 GET /api/sessions/current
@@ -178,7 +172,7 @@ Authorization: Bearer <token>
 }
 ```
 
-### **Recuperación de Contraseña**
+### Recuperación de Contraseña
 
 #### Solicitar recuperación de contraseña
 ```http
@@ -208,7 +202,7 @@ Content-Type: application/json
 - No permite usar la misma contraseña anterior
 - Envía email con enlace para restablecer
 
-### **Productos**
+### Productos
 
 **Rutas públicas (sin autenticación):**
 ```http
@@ -234,23 +228,23 @@ DELETE /products/:pid             # Eliminar producto (requiere admin)
 - Solo usuarios con rol `admin` pueden crear, actualizar y eliminar productos
 - Todos pueden ver y listar productos
 
-### **Carritos**
+### Carritos
 
 ```http
 POST   /api/carts                           # Crear carrito
 GET    /api/carts/:cid                      # Obtener carrito
 POST   /api/carts/:cid/products/:pid        # Agregar producto (solo usuarios)
 PUT    /api/carts/:cid/products/:pid        # Actualizar cantidad
-DELETE /api/carts/:cid/products/:pid         # Eliminar producto
+DELETE /api/carts/:cid/products/:pid        # Eliminar producto
 PUT    /api/carts/:cid                      # Actualizar carrito completo
-DELETE /api/carts/:cid                       # Vaciar carrito
+DELETE /api/carts/:cid                      # Vaciar carrito
 ```
 
 **Autorización:**
 - Solo usuarios con rol `user` pueden agregar productos al carrito
 - Los administradores no pueden agregar productos al carrito
 
-### **Tickets (Compras)**
+### Tickets (Compras)
 
 ```http
 POST   /api/tickets/carts/:cid/purchase     # Procesar compra del carrito (solo usuarios)
@@ -264,7 +258,53 @@ GET    /api/tickets/:tid                    # Obtener ticket por ID
 - Actualiza el stock de productos comprados
 - Maneja compras parciales (algunos productos sin stock)
 
-## 🎨 Vistas Web
+### Mocking (Generación de Datos)
+
+```http
+GET    /api/mocks/mockingpets               # Generar pets mockeados (sin insertar)
+GET    /api/mocks/mockingusers              # Generar 50 usuarios mockeados (sin insertar)
+POST   /api/mocks/generateData              # Generar e insertar datos en la BD
+```
+
+**POST /api/mocks/generateData:**
+```json
+{
+  "users": 10,
+  "pets": 20
+}
+```
+
+**Respuesta:**
+```json
+{
+  "status": "success",
+  "message": "Datos generados e insertados en la base de datos",
+  "results": {
+    "users": {
+      "requested": 10,
+      "created": 10
+    },
+    "pets": {
+      "requested": 20,
+      "created": 20
+    }
+  }
+}
+```
+
+**Características de usuarios mockeados:**
+- Contraseña: "coder123" (encriptada)
+- Role: aleatorio entre "user" y "admin"
+- Campo `pets`: array vacío
+
+### Pets
+
+```http
+GET    /api/pets                            # Listar todos los pets
+GET    /api/pets/:pid                       # Obtener pet por ID
+```
+
+## Vistas Web
 
 - `/products` - Lista de productos con paginación
 - `/products/:pid` - Detalle de producto
@@ -273,7 +313,7 @@ GET    /api/tickets/:tid                    # Obtener ticket por ID
 - `/login` - Inicio de sesión
 - `/profile` - Perfil del usuario (requiere autenticación)
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 src/
@@ -282,7 +322,8 @@ src/
 │   ├── cartController.js         # Lógica de carritos
 │   ├── userController.js         # Lógica de usuarios y autenticación
 │   ├── passwordResetController.js # Lógica de recuperación de contraseña
-│   └── ticketController.js       # Lógica de tickets/compras
+│   ├── ticketController.js       # Lógica de tickets/compras
+│   └── mocksController.js        # Lógica de mocking
 ├── dao/                           # Data Access Objects (DAO)
 │   ├── userDAO.js
 │   ├── productDAO.js
@@ -297,15 +338,19 @@ src/
 │   ├── emailService.js           # Servicio de envío de emails
 │   ├── passwordResetService.js   # Servicio de recuperación
 │   └── purchaseService.js        # Servicio de compras
+├── utils/                         # Utilidades
+│   └── mockingUtils.js           # Utilidades de mocking
 ├── dto/                           # Data Transfer Objects
 │   └── userDTO.js
 ├── middlewares/
+│   ├── auth.js                   # Middleware de autenticación
 │   └── authorization.js          # Middlewares de autorización
 ├── models/
 │   ├── Product.js                # Modelo de productos
 │   ├── Cart.js                   # Modelo de carritos
 │   ├── User.js                   # Modelo de usuarios
-│   └── Ticket.js                 # Modelo de tickets
+│   ├── Ticket.js                 # Modelo de tickets
+│   └── Pet.js                    # Modelo de pets
 ├── routes/
 │   ├── products.routes.js        # Rutas de productos
 │   ├── carts.routes.js           # Rutas de carritos
@@ -313,6 +358,8 @@ src/
 │   ├── sessions.routes.js        # Rutas de autenticación
 │   ├── passwordReset.routes.js   # Rutas de recuperación
 │   ├── tickets.routes.js         # Rutas de tickets
+│   ├── mocks.routes.js           # Rutas de mocking
+│   ├── pets.routes.js            # Rutas de pets
 │   └── views.routes.js           # Rutas de vistas web
 ├── views/
 │   ├── layouts/
@@ -320,6 +367,7 @@ src/
 │   ├── products.handlebars       # Vista de productos
 │   ├── productDetail.handlebars
 │   ├── cart.handlebars
+│   ├── addProduct.handlebars
 │   ├── register.handlebars       # Vista de registro
 │   ├── login.handlebars          # Vista de login
 │   └── profile.handlebars        # Vista de perfil
@@ -333,7 +381,7 @@ src/
 └── server.js                     # Servidor principal
 ```
 
-## 🔐 Sistema de Autenticación
+## Sistema de Autenticación
 
 ### Modelo de Usuario
 
@@ -345,6 +393,7 @@ El modelo `User` contiene:
 - `password`: String (requerido, encriptado con bcrypt)
 - `cart`: ObjectId (referencia a Cart)
 - `role`: String (default: 'user', valores: 'user' o 'admin')
+- `pets`: Array de ObjectIds (referencia a Pet, default: [])
 
 ### Encriptación de Contraseñas
 
@@ -371,8 +420,9 @@ El modelo `User` contiene:
 - `GET /api/sessions/current`: Valida el token JWT y devuelve los datos del usuario
 - Usa la estrategia `current` de Passport
 - Retorna error 401 si el token es inválido o no existe
+- Usa DTO para no exponer información sensible
 
-## 📝 Scripts Disponibles
+## Scripts Disponibles
 
 ```bash
 npm run dev      # Desarrollo con nodemon
@@ -380,9 +430,9 @@ npm start        # Producción
 npm run seed     # Cargar datos de ejemplo
 ```
 
-## 🔒 Seguridad y Autorización
+## Seguridad y Autorización
 
-- Contraseñas encriptadas con bcrypt.hashSync
+- Contraseñas encriptadas con bcrypt
 - Tokens JWT con expiración de 24 horas
 - Validación de tokens en rutas protegidas
 - Estrategias de Passport para autenticación
@@ -395,7 +445,7 @@ npm run seed     # Cargar datos de ejemplo
 - **Tokens de recuperación**: Expiran después de 1 hora
 - **Validación de contraseñas**: No permite reutilizar contraseñas anteriores
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 El proyecto implementa una arquitectura profesional con:
 
@@ -406,14 +456,10 @@ El proyecto implementa una arquitectura profesional con:
 - **Middlewares**: Autorización y validación centralizadas
 - **Separación de responsabilidades**: Cada capa tiene su función específica
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto está bajo la Licencia MIT.
 
-## 👨‍💻 Autor
+## Autor
 
 **Mariana**
-
----
-
-⭐ **¡Si este proyecto te fue útil, no olvides darle una estrella!** ⭐

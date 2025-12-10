@@ -17,7 +17,7 @@ router.get('/products', async (req, res) => {
     let cart = await CartModel.findOne().sort({ createdAt: -1 });
     if (!cart) {
       cart = await CartModel.create({ products: [] });
-      console.log('🛒 Nuevo carrito creado con ID:', cart._id);
+      console.log('Nuevo carrito creado con ID:', cart._id);
     }
 
     // Construir filtros basados en query
@@ -88,7 +88,7 @@ router.get('/products/:pid', async (req, res) => {
     let cart = await CartModel.findOne();
     if (!cart) {
       cart = await CartModel.create({ products: [] });
-      console.log('🛒 Nuevo carrito creado con ID:', cart._id);
+      console.log('Nuevo carrito creado con ID:', cart._id);
     }
 
     res.render('productDetail', {

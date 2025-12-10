@@ -165,7 +165,7 @@
         // Guardar estado original del botón
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
-        submitBtn.textContent = '⏳ Agregando...';
+        submitBtn.textContent = 'Agregando...';
         
         try {
           console.log('Enviando petición:', {
@@ -199,7 +199,7 @@
           }
           
           if (response.ok) {
-            submitBtn.textContent = '✅ Agregado';
+            submitBtn.textContent = 'Agregado';
             submitBtn.style.background = '#28a745';
             showSuccessMessage('Producto agregado al carrito');
             
@@ -251,7 +251,7 @@
     const deleteBtn = document.querySelector('.btn-danger');
     const originalText = deleteBtn.innerHTML;
     deleteBtn.disabled = true;
-    deleteBtn.innerHTML = '⏳ Eliminando...';
+    deleteBtn.innerHTML = 'Eliminando...';
 
     try {
       // Realizar petición AJAX

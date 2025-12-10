@@ -4,10 +4,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import methodOverride from 'method-override';
 
-// 🔹 Passport
+// Passport
 import './config/passport.config.js';
 
-// 🔹 Rutas
+// Rutas
 import productsRouter from './routes/products.routes.js';
 import cartsRouter from './routes/carts.routes.js';
 import viewsRouter from './routes/views.routes.js';
@@ -15,19 +15,21 @@ import sessionsRouter from './routes/sessions.routes.js';
 import usersRouter from './routes/users.routes.js';
 import passwordResetRouter from './routes/passwordReset.routes.js';
 import ticketsRouter from './routes/tickets.routes.js';
+import mocksRouter from './routes/mocks.routes.js';
+import petsRouter from './routes/pets.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// 🔹 Middlewares
+// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(methodOverride('_method')); // ✅ Permite DELETE/PUT desde formularios
+app.use(methodOverride('_method')); // Permite DELETE/PUT desde formularios
 
-// 🔹 Configuración Handlebars
+// Configuración Handlebars
 app.engine(
   'handlebars',
   engine({
@@ -42,19 +44,21 @@ app.engine(
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 
-// 🔹 Rutas principales
-app.use('/products', productsRouter); // 👈 Aquí es donde renderiza los productos
+// Rutas principales
+app.use('/products', productsRouter);
 app.use('/api/carts', cartsRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/password-reset', passwordResetRouter);
 app.use('/api/tickets', ticketsRouter);
+app.use('/api/mocks', mocksRouter);
+app.use('/api/pets', petsRouter);
 app.use('/', viewsRouter);
 
-// 🔹 Redirección principal
+// Redirección principal
 app.get('/', (req, res) => res.redirect('/products'));
 
-// 🔹 Endpoint de salud
+// Endpoint de salud
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 export default app;

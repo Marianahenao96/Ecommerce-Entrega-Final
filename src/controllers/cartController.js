@@ -1,18 +1,18 @@
 // src/controllers/cartController.js
 import cartRepository from '../repositories/cartRepository.js';
 
-// ✅ Crear un nuevo carrito
+// Crear un nuevo carrito
 export const createCart = async (req, res) => {
   try {
     const newCart = await cartRepository.createCart();
     res.status(201).json({ message: 'Carrito creado', cart: newCart });
   } catch (error) {
-    console.error('❌ Error al crear carrito:', error);
+    console.error('Error al crear carrito:', error);
     res.status(500).json({ message: 'Error al crear carrito' });
   }
 };
 
-// ✅ Obtener carrito por ID
+// Obtener carrito por ID
 export const getCart = async (req, res) => {
   try {
     const { cid } = req.params;
@@ -52,7 +52,7 @@ export const getCart = async (req, res) => {
       cartTotal
     });
   } catch (error) {
-    console.error('❌ Error al obtener carrito:', error);
+    console.error('Error al obtener carrito:', error);
     
     if (req.path.startsWith('/api/')) {
       return res.status(500).json({ status: 'error', message: 'Error al obtener carrito' });
@@ -62,7 +62,7 @@ export const getCart = async (req, res) => {
   }
 };
 
-// ✅ Agregar producto al carrito
+// Agregar producto al carrito
 export const addProductToCart = async (req, res) => {
   try {
     const { cid, pid } = req.params;
@@ -70,7 +70,7 @@ export const addProductToCart = async (req, res) => {
 
     try {
       const cart = await cartRepository.addProductToCart(cid, pid, quantity);
-      console.log(`✅ Producto ${pid} agregado al carrito ${cid}`);
+      console.log(`Producto ${pid} agregado al carrito ${cid}`);
       
       // Siempre devolver JSON para peticiones AJAX/API
       const isAjax = req.headers.accept && req.headers.accept.includes('application/json') || 
@@ -104,7 +104,7 @@ export const addProductToCart = async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.error('❌ Error al agregar producto al carrito:', error);
+    console.error('Error al agregar producto al carrito:', error);
     
     const isAjax = req.headers.accept && req.headers.accept.includes('application/json') ||
                    req.headers['x-requested-with'] === 'XMLHttpRequest' ||
@@ -122,7 +122,7 @@ export const addProductToCart = async (req, res) => {
   }
 };
 
-// ✅ Eliminar producto específico del carrito
+// Eliminar producto específico del carrito
 export const deleteProductFromCart = async (req, res) => {
   try {
     const { cid, pid } = req.params;
@@ -149,7 +149,7 @@ export const deleteProductFromCart = async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.error('❌ Error al eliminar producto del carrito:', error);
+    console.error('Error al eliminar producto del carrito:', error);
     
     if (req.path.startsWith('/api/')) {
       return res.status(500).json({ status: 'error', message: 'Error al eliminar producto del carrito' });
@@ -159,7 +159,7 @@ export const deleteProductFromCart = async (req, res) => {
   }
 };
 
-// ✅ Actualizar cantidad de un producto
+// Actualizar cantidad de un producto
 export const updateProductQuantity = async (req, res) => {
   try {
     const { cid, pid } = req.params;
@@ -175,12 +175,12 @@ export const updateProductQuantity = async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.error('❌ Error al actualizar cantidad:', error);
+    console.error('Error al actualizar cantidad:', error);
     res.status(500).send('Error al actualizar cantidad');
   }
 };
 
-// ✅ Actualizar todos los productos del carrito
+// Actualizar todos los productos del carrito
 export const updateCart = async (req, res) => {
   try {
     const { cid } = req.params;
@@ -216,7 +216,7 @@ export const updateCart = async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.error('❌ Error al actualizar carrito:', error);
+    console.error('Error al actualizar carrito:', error);
     
     if (req.path.startsWith('/api/')) {
       return res.status(500).json({ status: 'error', message: 'Error al actualizar carrito' });
@@ -226,7 +226,7 @@ export const updateCart = async (req, res) => {
   }
 };
 
-// ✅ Vaciar carrito (eliminar todos los productos)
+// Vaciar carrito (eliminar todos los productos)
 export const clearCart = async (req, res) => {
   try {
     const { cid } = req.params;
@@ -253,7 +253,7 @@ export const clearCart = async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.error('❌ Error al vaciar carrito:', error);
+    console.error('Error al vaciar carrito:', error);
     
     if (req.path.startsWith('/api/')) {
       return res.status(500).json({ status: 'error', message: 'Error al vaciar carrito' });

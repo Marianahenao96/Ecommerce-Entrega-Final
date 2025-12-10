@@ -1,6 +1,6 @@
 import productRepository from '../repositories/productRepository.js';
 
-// ✅ Obtener todos los productos con paginación y filtros
+// Obtener todos los productos con paginación y filtros
 export const getProducts = async (req, res) => {
   try {
     const { limit = 10, page = 1, sort, query } = req.query;
@@ -70,7 +70,7 @@ export const getProducts = async (req, res) => {
       products: result.docs, // Para compatibilidad con la vista existente
     });
   } catch (error) {
-    console.error('❌ Error al obtener productos:', error);
+    console.error('Error al obtener productos:', error);
     
     const errorResponse = {
       status: 'error',
@@ -85,7 +85,7 @@ export const getProducts = async (req, res) => {
   }
 };
 
-// ✅ Obtener producto por ID
+// Obtener producto por ID
 export const getProductById = async (req, res) => {
   try {
     const { pid } = req.params;
@@ -109,7 +109,7 @@ export const getProductById = async (req, res) => {
       product 
     });
   } catch (error) {
-    console.error('❌ Error al obtener producto:', error);
+    console.error('Error al obtener producto:', error);
     
     if (req.path.startsWith('/api/')) {
       return res.status(500).json({ status: 'error', message: 'Error al obtener producto' });
@@ -119,7 +119,7 @@ export const getProductById = async (req, res) => {
   }
 };
 
-// ✅ Crear producto
+// Crear producto
 export const createProduct = async (req, res) => {
   try {
     const { title, description, code, price, stock, category, thumbnails, status } = req.body;
@@ -179,7 +179,7 @@ export const createProduct = async (req, res) => {
       thumbnails: processedThumbnails,
     });
 
-    console.log('✅ Producto creado:', product);
+    console.log('Producto creado:', product);
 
     // Detectar si es una petición AJAX o API
     if (req.path.startsWith('/api/') || 
@@ -194,7 +194,7 @@ export const createProduct = async (req, res) => {
 
     res.redirect('/products');
   } catch (error) {
-    console.error('❌ Error al crear producto:', error);
+    console.error('Error al crear producto:', error);
     
     // Detectar si es una petición AJAX o API
     const isAjax = req.path.startsWith('/api/') || 
@@ -223,7 +223,7 @@ export const createProduct = async (req, res) => {
   }
 };
 
-// ✅ Actualizar producto
+// Actualizar producto
 export const updateProduct = async (req, res) => {
   try {
     const { pid } = req.params;
@@ -231,12 +231,12 @@ export const updateProduct = async (req, res) => {
     if (!result) return res.status(404).send('Producto no encontrado');
     res.redirect('/products');
   } catch (error) {
-    console.error('❌ Error al actualizar producto:', error);
+    console.error('Error al actualizar producto:', error);
     res.status(500).send('Error al actualizar producto');
   }
 };
 
-// ✅ Eliminar producto
+// Eliminar producto
 export const deleteProduct = async (req, res) => {
   try {
     const { pid } = req.params;
@@ -244,7 +244,7 @@ export const deleteProduct = async (req, res) => {
     // Eliminar el producto (el repository verifica que existe)
     const result = await productRepository.deleteProduct(pid);
     
-    console.log(`✅ Producto eliminado: ${result.title} (ID: ${pid})`);
+    console.log(`Producto eliminado: ${result.title} (ID: ${pid})`);
 
     if (req.path.startsWith('/api/')) {
       return res.json({ 
@@ -260,7 +260,7 @@ export const deleteProduct = async (req, res) => {
 
     res.redirect('/products');
   } catch (error) {
-    console.error('❌ Error al eliminar producto:', error);
+    console.error('Error al eliminar producto:', error);
     
     if (error.message.includes('no encontrado')) {
       if (req.path.startsWith('/api/')) {
@@ -283,7 +283,7 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
-// ✅ Disminuir stock
+// Disminuir stock
 export const decreaseStock = async (req, res) => {
   try {
     const { pid } = req.params;
@@ -297,7 +297,7 @@ export const decreaseStock = async (req, res) => {
 
     res.redirect('/products');
   } catch (error) {
-    console.error('❌ Error al reducir stock:', error);
+    console.error('Error al reducir stock:', error);
     res.status(500).send('Error al modificar el stock');
   }
 };

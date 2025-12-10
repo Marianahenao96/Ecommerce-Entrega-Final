@@ -14,29 +14,29 @@ import { authenticateJWT } from '../middlewares/auth.js';
 
 const router = Router();
 
-// ✅ Crear carrito
+// Crear carrito
 router.post('/', createCart);
 
-// ✅ Obtener carrito (con populate)
+// Obtener carrito (con populate)
 router.get('/:cid', getCart);
 
-// ✅ Agregar producto al carrito (solo usuarios, no admin)
+// Agregar producto al carrito (solo usuarios, no admin)
 router.post('/:cid/products/:pid', 
   authenticateJWT,
   isUser,
   addProductToCart
 );
 
-// ✅ Eliminar producto específico del carrito
+// Eliminar producto específico del carrito
 router.delete('/:cid/products/:pid', deleteProductFromCart);
 
-// ✅ Actualizar cantidad de un producto específico
+// Actualizar cantidad de un producto específico
 router.put('/:cid/products/:pid', updateProductQuantity);
 
-// ✅ Actualizar todos los productos del carrito
+// Actualizar todos los productos del carrito
 router.put('/:cid', updateCart);
 
-// ✅ Vaciar carrito (eliminar todos los productos)
+// Vaciar carrito (eliminar todos los productos)
 router.delete('/:cid', clearCart);
 
 export default router;

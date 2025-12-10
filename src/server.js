@@ -20,7 +20,7 @@ const mongooseOptions = {
 mongoose
   .connect(MONGO_URI, mongooseOptions)
   .then(async () => {
-    console.log('✅ Conectado a MongoDB');
+    console.log('Conectado a MongoDB');
     
     // Verificar conexión con servidor de email (si está configurado)
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
@@ -28,10 +28,10 @@ mongoose
     }
     
     app.listen(PORT, () => {
-      console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
+      console.log(`Servidor escuchando en http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
-    console.error('❌ Error conectando a MongoDB:', err.message);
+    console.error('Error conectando a MongoDB:', err.message);
     process.exit(1);
   });

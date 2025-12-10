@@ -216,7 +216,7 @@
     // Deshabilitar botón
     const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
-    submitBtn.textContent = '⏳ Creando...';
+    submitBtn.textContent = 'Creando...';
     
     try {
       const response = await fetch('/products', {
@@ -239,7 +239,7 @@
       }
       
       if (response.ok) {
-        alert('✅ Producto creado exitosamente');
+        alert('Producto creado exitosamente');
         window.location.href = '/products';
       } else {
         if (response.status === 401) {
