@@ -29,7 +29,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"title\": \"Producto de prueba\",\n  \"description\": \"Descripción de ejemplo\",\n  \"code\": \"PR-001\",\n  \"price\": 1200,\n  \"stock\": 10,\n  \"category\": \"Electrónica\",\n  \"thumbnails\": [\"https://via.placeholder.com/200\"]\n}"
+          "raw": "{\n  \"title\": \"Alimento Premium para Perros\",\n  \"description\": \"Alimento balanceado para perros adultos, 15kg\",\n  \"code\": \"ALIM001\",\n  \"price\": 85000,\n  \"stock\": 25,\n  \"category\": \"alimentos\",\n  \"thumbnails\": [\"https://via.placeholder.com/200\"]\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/products",

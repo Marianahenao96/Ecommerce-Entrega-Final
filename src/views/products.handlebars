@@ -14,14 +14,14 @@
         <select name="query" id="query">
           <option value="">Todos los productos</option>
           <option value="available" {{#if (eq query "available")}}selected{{/if}}>Disponibles</option>
-          <option value="electronics" {{#if (eq query "electronics")}}selected{{/if}}>Electrónicos</option>
-          <option value="clothing" {{#if (eq query "clothing")}}selected{{/if}}>Ropa</option>
-          <option value="books" {{#if (eq query "books")}}selected{{/if}}>Libros</option>
-          <option value="home" {{#if (eq query "home")}}selected{{/if}}>Hogar</option>
-          <option value="sports" {{#if (eq query "sports")}}selected{{/if}}>Deportes</option>
-          <option value="beauty" {{#if (eq query "beauty")}}selected{{/if}}>Belleza</option>
-          <option value="toys" {{#if (eq query "toys")}}selected{{/if}}>Juguetes</option>
-          <option value="automotive" {{#if (eq query "automotive")}}selected{{/if}}>Automotriz</option>
+          <option value="alimentos" {{#if (eq query "alimentos")}}selected{{/if}}>Alimentos</option>
+          <option value="juguetes" {{#if (eq query "juguetes")}}selected{{/if}}>Juguetes</option>
+          <option value="accesorios" {{#if (eq query "accesorios")}}selected{{/if}}>Accesorios</option>
+          <option value="higiene" {{#if (eq query "higiene")}}selected{{/if}}>Higiene</option>
+          <option value="medicamentos" {{#if (eq query "medicamentos")}}selected{{/if}}>Medicamentos</option>
+          <option value="ropa" {{#if (eq query "ropa")}}selected{{/if}}>Ropa</option>
+          <option value="cama-descanso" {{#if (eq query "cama-descanso")}}selected{{/if}}>Cama y Descanso</option>
+          <option value="transporte" {{#if (eq query "transporte")}}selected{{/if}}>Transporte</option>
           <option value="other" {{#if (eq query "other")}}selected{{/if}}>Otros</option>
         </select>
       </div>
@@ -131,20 +131,22 @@
     align-items: center;
     margin-bottom: 30px;
     padding-bottom: 20px;
-    border-bottom: 2px solid #e9ecef;
+    border-bottom: 3px solid #f4d03f;
   }
 
   .page-header h1 {
     margin: 0;
-    color: #333;
+    color: #2d4a35;
     font-size: 32px;
+    font-weight: bold;
   }
 
   .controls {
-    background: #f8f9fa;
+    background: linear-gradient(135deg, #f5f5dc 0%, #fffef0 100%);
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
+    border: 2px solid #6b9d7a;
   }
 
   .filter-form {
@@ -186,17 +188,18 @@
   }
 
   .product-card {
-    border: 1px solid #e0e0e0;
+    border: 2px solid #6b9d7a;
     padding: 20px;
     border-radius: 12px;
     background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(74, 124, 89, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   }
 
   .product-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(74, 124, 89, 0.3);
+    border-color: #f4d03f;
   }
 
   .product-image {
@@ -234,21 +237,23 @@
 
   .price {
     font-size: 20px;
-    color: #28a745;
+    color: #4a7c59;
+    font-weight: bold;
     margin: 10px 0;
   }
 
   .stock {
-    color: #666;
+    color: #6b9d7a;
     font-size: 14px;
     margin: 5px 0;
   }
 
   .category {
-    color: #007bff;
+    color: #8b4513;
     font-size: 12px;
     text-transform: uppercase;
     margin: 5px 0 15px 0;
+    font-weight: 600;
   }
 
   .product-actions {
@@ -269,21 +274,25 @@
   }
 
   .btn-primary {
-    background: #007bff;
+    background: #4a7c59;
     color: white;
+    border: none;
   }
 
   .btn-primary:hover {
-    background: #0056b3;
+    background: #2d4a35;
+    transform: translateY(-1px);
   }
 
   .btn-success {
-    background: #28a745;
+    background: #6b9d7a;
     color: white;
+    border: none;
   }
 
   .btn-success:hover {
-    background: #218838;
+    background: #4a7c59;
+    transform: translateY(-1px);
   }
 
   .btn-secondary {
@@ -311,19 +320,21 @@
 
   .page-link {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #6b9d7a;
     border-radius: 4px;
     text-decoration: none;
-    color: #007bff;
+    color: #4a7c59;
   }
 
   .page-link:hover {
-    background: #f8f9fa;
+    background: #f4d03f;
+    color: #2d4a35;
+    border-color: #f4d03f;
   }
 
   .current-page {
     padding: 8px 12px;
-    background: #007bff;
+    background: #4a7c59;
     color: white;
     border-radius: 4px;
     font-weight: bold;

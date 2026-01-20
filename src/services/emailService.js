@@ -48,7 +48,7 @@ class EmailService {
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:8080'}/reset-password?token=${resetToken}`;
     
     const mailOptions = {
-      from: `"${process.env.EMAIL_FROM_NAME || 'Ecommerce'}" <${process.env.SMTP_USER}>`,
+      from: `"${process.env.EMAIL_FROM_NAME || 'Pet Ecommerce'}" <${process.env.SMTP_USER}>`,
       to: email,
       subject: 'Recuperación de contraseña',
       html: `

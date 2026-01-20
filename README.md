@@ -1,6 +1,100 @@
-# Ecommerce API - Backend con Autenticación
+# Pet Ecommerce API - Backend con Autenticación
 
-API RESTful de ecommerce desarrollada con Node.js, Express y MongoDB. Incluye gestión de productos, carritos de compras, sistema completo de autenticación y autorización con JWT, y vistas web responsivas.
+API RESTful de ecommerce para tienda de mascotas desarrollada con Node.js, Express y MongoDB. Incluye gestión de productos, carritos de compras, sistema completo de autenticación y autorización con JWT, y vistas web responsivas.
+
+## 🐳 Docker
+
+### Imagen de Docker en Dockerhub
+
+La imagen de Docker está disponible en Dockerhub:
+
+**🔗 [Ver imagen en Dockerhub](https://hub.docker.com/r/mariana96/pet-ecommerce)**
+
+### Ejecutar con Docker
+
+#### Opción 1: Usar la imagen de Dockerhub
+
+```bash
+# Descargar y ejecutar la imagen
+docker run -d \
+  -p 8080:8080 \
+  -e MONGO_URI=mongodb://host.docker.internal:27017/ecommerce \
+  -e PORT=8080 \
+  -e JWT_SECRET=tu_secret_key_super_segura \
+  --name pet-ecommerce \
+  mariana96/pet-ecommerce:latest
+```
+
+#### Opción 2: Construir la imagen localmente
+
+```bash
+# Construir la imagen
+docker build -t pet-ecommerce .
+
+# Ejecutar el contenedor
+docker run -d \
+  -p 8080:8080 \
+  -e MONGO_URI=mongodb://host.docker.internal:27017/ecommerce \
+  -e PORT=8080 \
+  -e JWT_SECRET=tu_secret_key_super_segura \
+  --name pet-ecommerce \
+  pet-ecommerce
+```
+
+#### Opción 3: Usar Docker Compose
+
+```bash
+# Ejecutar con docker-compose (requiere archivo docker-compose.yml)
+docker-compose up -d
+```
+
+### Variables de entorno para Docker
+
+Asegúrate de configurar las siguientes variables de entorno al ejecutar el contenedor:
+
+- `MONGO_URI`: URI de conexión a MongoDB
+- `PORT`: Puerto del servidor (default: 8080)
+- `JWT_SECRET`: Clave secreta para JWT
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`: Para servicio de email (opcional)
+
+### Acceder a la aplicación
+
+Una vez ejecutado el contenedor, la aplicación estará disponible en:
+- **API**: `http://localhost:8080`
+- **Documentación Swagger**: `http://localhost:8080/api-docs`
+- **Vistas Web**: `http://localhost:8080/products`
+
+### Subir imagen a Dockerhub
+
+Para subir la imagen a Dockerhub:
+
+```bash
+# 1. Iniciar sesión en Dockerhub
+docker login
+
+# 2. Construir la imagen con tu nombre de usuario
+docker build -t mariana96/pet-ecommerce:latest .
+
+# 3. Subir la imagen
+docker push mariana96/pet-ecommerce:latest
+```
+
+**Imagen disponible en**: [Dockerhub - mariana96/pet-ecommerce](https://hub.docker.com/r/mariana96/pet-ecommerce)
+
+### Usar Docker Compose
+
+Para ejecutar la aplicación con MongoDB incluido:
+
+```bash
+# Ejecutar con docker-compose
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Detener
+docker-compose down
+```
 
 ## Características
 
@@ -34,6 +128,9 @@ API RESTful de ecommerce desarrollada con Node.js, Express y MongoDB. Incluye ge
 - **Handlebars** (templates)
 - **Bootstrap 5** (UI)
 - **@faker-js/faker** (generación de datos mock)
+- **Swagger/OpenAPI** (documentación de API)
+- **Jest** + **Supertest** (testing)
+- **Docker** (containerización)
 
 ## Instalación
 
@@ -77,6 +174,51 @@ npm start
 ```
 
 El servidor estará disponible en `http://localhost:8080`
+
+## 📚 Documentación de API (Swagger)
+
+La documentación completa de la API está disponible en Swagger UI:
+
+**🔗 [Documentación Swagger](http://localhost:8080/api-docs)**
+
+La documentación incluye:
+- Todos los endpoints del módulo de **Users** con ejemplos
+- Esquemas de datos (schemas)
+- Códigos de respuesta
+- Ejemplos de requests y responses
+
+### Endpoints documentados en Swagger
+
+- **Users**: CRUD completo de usuarios
+  - `POST /api/users` - Crear usuario
+  - `GET /api/users` - Obtener todos los usuarios
+  - `GET /api/users/:uid` - Obtener usuario por ID
+  - `PUT /api/users/:uid` - Actualizar usuario
+  - `DELETE /api/users/:uid` - Eliminar usuario
+
+## 🧪 Testing
+
+### Ejecutar tests
+
+```bash
+# Ejecutar todos los tests
+npm test
+
+# Ejecutar tests en modo watch
+npm run test:watch
+
+# Ejecutar tests con cobertura
+npm run test:coverage
+```
+
+### Tests implementados
+
+- **Tests funcionales para Pets Router** (`/api/pets`)
+  - `GET /api/pets` - Obtener todos los pets
+  - `GET /api/pets/:pid` - Obtener pet por ID
+  - Casos de éxito y error
+  - Validación de respuestas
+  - Manejo de errores
 
 ## Endpoints de la API
 
@@ -373,12 +515,19 @@ src/
 │   └── profile.handlebars        # Vista de perfil
 ├── config/
 │   ├── db.js                     # Configuración de BD
-│   └── passport.config.js        # Configuración de Passport
+│   ├── passport.config.js        # Configuración de Passport
+│   └── swagger.config.js         # Configuración de Swagger
+├── tests/
+│   └── pets.test.js              # Tests funcionales de pets
 ├── public/
 │   └── css/
 │       └── styles.css
 ├── app.js                        # Configuración de Express
 └── server.js                     # Servidor principal
+├── Dockerfile                    # Configuración de Docker
+├── .dockerignore                 # Archivos ignorados en Docker
+├── jest.config.js                # Configuración de Jest
+└── package.json                  # Dependencias y scripts
 ```
 
 ## Sistema de Autenticación

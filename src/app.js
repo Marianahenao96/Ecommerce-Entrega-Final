@@ -7,6 +7,9 @@ import methodOverride from 'method-override';
 // Passport
 import './config/passport.config.js';
 
+// Swagger
+import { swaggerSpec, swaggerUi } from './config/swagger.config.js';
+
 // Rutas
 import productsRouter from './routes/products.routes.js';
 import cartsRouter from './routes/carts.routes.js';
@@ -43,6 +46,12 @@ app.engine(
 );
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
+
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Pet Ecommerce API Documentation'
+}));
 
 // Rutas principales
 app.use('/products', productsRouter);

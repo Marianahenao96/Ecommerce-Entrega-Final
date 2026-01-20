@@ -12,7 +12,7 @@ export const getProducts = async (req, res) => {
         filter = { stock: { $gt: 0 }, status: true };
       } else {
         // Validar que la categoría sea válida
-        const validCategories = ['electronics', 'clothing', 'books', 'home', 'sports', 'beauty', 'toys', 'automotive', 'other'];
+        const validCategories = ['alimentos', 'juguetes', 'accesorios', 'higiene', 'medicamentos', 'ropa', 'cama-descanso', 'transporte', 'other'];
         if (validCategories.includes(query)) {
           filter = { category: query, status: true };
         } else {

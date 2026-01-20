@@ -1,12 +1,122 @@
+/* Variables de color para Pet Ecommerce - Tema Pet Shop */
+:root {
+  --pet-green: #4a7c59;
+  --pet-green-light: #6b9d7a;
+  --pet-green-dark: #2d4a35;
+  --pet-yellow: #f4d03f;
+  --pet-yellow-light: #f7dc6f;
+  --pet-yellow-dark: #d4b82e;
+  --pet-brown: #8b4513;
+  --pet-brown-light: #a0522d;
+  --pet-brown-dark: #654321;
+  --pet-bg-light: #f5f5dc;
+  --pet-bg-cream: #fffef0;
+  --pet-text-dark: #2d4a35;
+  --pet-text-light: #6b9d7a;
+}
+
 body {
   font-family: 'Segoe UI', sans-serif;
+  background-color: var(--pet-bg-cream);
+  color: var(--pet-text-dark);
+}
+
+/* Navbar con tema pet shop */
+.navbar-dark.bg-dark {
+  background-color: var(--pet-green) !important;
+  border-bottom: 3px solid var(--pet-yellow);
+}
+
+.navbar-brand {
+  color: var(--pet-yellow) !important;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.btn-outline-light {
+  border-color: var(--pet-yellow);
+  color: var(--pet-yellow);
+}
+
+.btn-outline-light:hover {
+  background-color: var(--pet-yellow);
+  color: var(--pet-green-dark);
+  border-color: var(--pet-yellow);
+}
+
+.btn-outline-success {
+  border-color: var(--pet-green-light);
+  color: var(--pet-green-light);
+}
+
+.btn-outline-success:hover {
+  background-color: var(--pet-green-light);
+  color: white;
+  border-color: var(--pet-green-light);
 }
 
 .card-title {
   font-weight: bold;
+  color: var(--pet-text-dark);
 }
 
 .card img {
   height: 200px;
   object-fit: cover;
+}
+
+/* Botones principales con tema pet */
+.btn-primary {
+  background-color: var(--pet-green);
+  border-color: var(--pet-green);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--pet-green-dark);
+  border-color: var(--pet-green-dark);
+}
+
+.btn-success {
+  background-color: var(--pet-green-light);
+  border-color: var(--pet-green-light);
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: var(--pet-green);
+  border-color: var(--pet-green);
+}
+
+.btn-warning {
+  background-color: var(--pet-yellow);
+  border-color: var(--pet-yellow);
+  color: var(--pet-text-dark);
+}
+
+.btn-warning:hover {
+  background-color: var(--pet-yellow-dark);
+  border-color: var(--pet-yellow-dark);
+  color: white;
+}
+
+/* Enlaces */
+a {
+  color: var(--pet-green);
+}
+
+a:hover {
+  color: var(--pet-green-dark);
+}
+
+/* Cards y contenedores */
+.card {
+  background-color: white;
+  border: 1px solid var(--pet-green-light);
+  border-radius: 12px;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(74, 124, 89, 0.2);
+  border-color: var(--pet-yellow);
 }

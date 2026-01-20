@@ -1,37 +1,53 @@
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import app from './app.js';
+import { connectDB } from './config/db.js';
 import emailService from './services/emailService.js';
 
 dotenv.config();
 
 const PORT = process.env.PORT || 8080;
-// MongoDB Atlas URI - Debe estar configurado en el archivo .env
-// Formato: mongodb+srv://usuario:password@cluster.mongodb.net/database?retryWrites=true&w=majority
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/ecommerce';
 
-// Configuración de conexión a MongoDB Atlas
-const mongooseOptions = {
-  // Opciones recomendadas para MongoDB Atlas
-  retryWrites: true,
-  w: 'majority'
-};
-
-mongoose
-  .connect(MONGO_URI, mongooseOptions)
-  .then(async () => {
-    console.log('Conectado a MongoDB');
+/**
+ * Inicia el servidor de la aplicación
+ */
+async function startServer() {
+  try {
+    // Conectar a la base de datos usando la configuración centralizada
+    await connectDB();
     
     // Verificar conexión con servidor de email (si está configurado)
+    // Esto se hace después de la conexión a DB para no bloquear el inicio del servidor
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      await emailService.verifyConnection();
+      try {
+        await emailService.verifyConnection();
+      } catch (emailError) {
+        console.warn('⚠️ Advertencia: No se pudo verificar la conexión del servidor de email:', emailError.message);
+        console.warn('El servidor continuará funcionando, pero el servicio de email puede no estar disponible.');
+      }
     }
     
+    // Iniciar el servidor HTTP
     app.listen(PORT, () => {
-      console.log(`Servidor escuchando en http://localhost:${PORT}`);
+      console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error('Error conectando a MongoDB:', err.message);
+
+  } catch (error) {
+    console.error('❌ Error al iniciar el servidor:', error.message);
+    console.error('Detalles:', error);
     process.exit(1);
-  });
+  }
+}
+
+// Manejar errores no capturados
+process.on('unhandledRejection', (err) => {
+  console.error('❌ Unhandled Rejection:', err);
+  // No salir inmediatamente, permitir que el servidor intente recuperarse
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err);
+  process.exit(1);
+});
+
+// Iniciar el servidor
+startServer();
